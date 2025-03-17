@@ -183,17 +183,17 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/ItemsIndexModel"
+                  "$ref": "#/components/schemas/ItemsAdminModel"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ItemsIndexModel"
+                  "$ref": "#/components/schemas/ItemsAdminModel"
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ItemsIndexModel"
+                  "$ref": "#/components/schemas/ItemsAdminModel"
                 }
               }
             }
@@ -221,26 +221,17 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/ItemViewModel"
-                  }
+                  "$ref": "#/components/schemas/ItemsIndexModel"
                 }
               },
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/ItemViewModel"
-                  }
+                  "$ref": "#/components/schemas/ItemsIndexModel"
                 }
               },
               "text/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/ItemViewModel"
-                  }
+                  "$ref": "#/components/schemas/ItemsIndexModel"
                 }
               }
             }
@@ -381,6 +372,27 @@
             }
           }
         },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Items"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Success"
@@ -629,6 +641,27 @@
             "description": "Success"
           }
         }
+      },
+      "delete": {
+        "tags": [
+          "ItemTransactions"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
       }
     },
     "/admin/Users": {
@@ -819,55 +852,6 @@
         },
         "additionalProperties": false
       },
-      "ItemBalanceSheetViewModel": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "reportId": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "date": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "item": {
-            "$ref": "#/components/schemas/ItemViewModel"
-          },
-          "itemId": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "lastStock": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "inQty": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "outQty": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "quantityChanged": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "stock": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "ps": {
-            "type": "string",
-            "nullable": true
-          }
-        },
-        "additionalProperties": false
-      },
       "ItemEditForm": {
         "type": "object",
         "properties": {
@@ -884,6 +868,9 @@
             "nullable": true
           },
           "active": {
+            "type": "boolean"
+          },
+          "canRemove": {
             "type": "boolean"
           }
         },
@@ -959,13 +946,6 @@
             "type": "string",
             "nullable": true,
             "readOnly": true
-          },
-          "itemBalanceSheets": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ItemBalanceSheetViewModel"
-            },
-            "nullable": true
           }
         },
         "additionalProperties": false
@@ -1087,6 +1067,9 @@
           "date": {
             "type": "string",
             "nullable": true
+          },
+          "canRemove": {
+            "type": "boolean"
           }
         },
         "additionalProperties": false
@@ -1356,16 +1339,7 @@
         },
         "additionalProperties": false
       },
-      "ItemsFetchRequest": {
-        "type": "object",
-        "properties": {
-          "active": {
-            "type": "boolean"
-          }
-        },
-        "additionalProperties": false
-      },
-      "ItemsIndexModel": {
+      "ItemsAdminModel": {
         "type": "object",
         "properties": {
           "request": {
@@ -1383,6 +1357,31 @@
           },
           "transactionLabels": {
             "$ref": "#/components/schemas/ItemTransactionLabels"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ItemsFetchRequest": {
+        "type": "object",
+        "properties": {
+          "active": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ItemsIndexModel": {
+        "type": "object",
+        "properties": {
+          "lastClosed": {
+            "$ref": "#/components/schemas/ItemReportViewModel"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ItemViewModel"
+            },
+            "nullable": true
           }
         },
         "additionalProperties": false

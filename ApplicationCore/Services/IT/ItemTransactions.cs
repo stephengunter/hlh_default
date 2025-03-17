@@ -1,6 +1,7 @@
 ﻿using ApplicationCore.DataAccess;
 using ApplicationCore.Models.IT;
 using ApplicationCore.Specifications.IT;
+using Ardalis.Specification;
 using Infrastructure.Helpers;
 using Infrastructure.Interfaces;
 
@@ -8,16 +9,16 @@ namespace ApplicationCore.Services.IT;
 
 public interface IItemTransactionService
 {
-   Task<int?> FindMinYearAsync();
-   Task<IEnumerable<ItemTransaction>> FetchAsync(int year, int month, ICollection<string>? includes = null);
-   Task<IEnumerable<ItemTransaction>> FetchAsync(DateTime sinceDate, DateTime endDate, ICollection<string>? includes = null);
    Task<IEnumerable<ItemTransaction>> FetchAsync(Item entity, ICollection<string>? includes = null);
-   Task<IEnumerable<ItemTransaction>> FetchAsync(Item entity, DateTime sinceDate, DateTime endDate, ICollection<string>? includes = null);
+   Task<IEnumerable<ItemTransaction>> FetchAsync(DateTime sinceDate, ICollection<string>? includes = null);
+   Task<IEnumerable<ItemTransaction>> FetchAsync(DateTime sinceDate, DateTime endDate, ICollection<string>? includes = null);
+   Task<IEnumerable<ItemTransaction>> FetchAsync(DateTime sinceDate, DateTime endDate, Item entity, ICollection<string>? includes = null);
    Task<ItemTransaction?> GetByIdAsync(int id);
    Task<ItemTransaction> CreateAsync(ItemTransaction entity, string userId);
    Task UpdateAsync(ItemTransaction entity, string userId);
    Task RemoveAsync(ItemTransaction entity, string userId);
    Task AddRangeAsync(ICollection<ItemTransaction> entities);
+   Task UpdateRangeAsync(ICollection<ItemTransaction> entities);
 }
 
 public class ItemTransactionService : IItemTransactionService
@@ -28,19 +29,17 @@ public class ItemTransactionService : IItemTransactionService
 	{
       _repository = repository;
 	}
-   public async Task<int?> FindMinYearAsync()
-      => await _repository.FirstOrDefaultAsync(new ItemTransactionsMinYearSpecification());
-
-   public async Task<IEnumerable<ItemTransaction>> FetchAsync(int year, int month, ICollection<string>? includes = null)
-       => await _repository.ListAsync(new ItemTransactionYearMonthSpecification(year, month, includes));
    public async Task<IEnumerable<ItemTransaction>> FetchAsync(Item entity, ICollection<string>? includes = null)
        => await _repository.ListAsync(new ItemTransactionSpecification(entity, includes));
 
-   public async Task<IEnumerable<ItemTransaction>> FetchAsync(Item entity, DateTime sinceDate, DateTime endDate, ICollection<string>? includes = null)
-      => await _repository.ListAsync(new ItemTransactionSpecification(entity, sinceDate.ToStartDate(), endDate.ToEndDate(), includes));
+   public async Task<IEnumerable<ItemTransaction>> FetchAsync(DateTime sinceDate, ICollection<string>? includes = null)
+      => await _repository.ListAsync(new ItemTransactionDateSpecification(sinceDate, includes));
+
+   public async Task<IEnumerable<ItemTransaction>> FetchAsync(DateTime sinceDate, DateTime endDate, Item entity, ICollection<string>? includes = null)
+      => await _repository.ListAsync(new ItemTransactionDateSpecification(sinceDate.ToStartDate(), endDate.ToEndDate(), entity, includes));
 
    public async Task<IEnumerable<ItemTransaction>> FetchAsync(DateTime sinceDate, DateTime endDate, ICollection<string>? includes = null)
-     => await _repository.ListAsync(new ItemTransactionSpecification(sinceDate.ToStartDate(), endDate.ToEndDate(), includes));
+     => await _repository.ListAsync(new ItemTransactionDateSpecification(sinceDate.ToStartDate(), endDate.ToEndDate(), includes));
 
 
    public async Task<ItemTransaction?> GetByIdAsync(int id)
@@ -59,6 +58,8 @@ public class ItemTransactionService : IItemTransactionService
       entity.SetUpdated(userId);
       await _repository.UpdateAsync(entity);
    }
+   public async Task UpdateRangeAsync(ICollection<ItemTransaction> entities)
+    => await _repository.UpdateRangeAsync(entities);
 
    public async Task RemoveAsync(ItemTransaction entity, string userId)
    {

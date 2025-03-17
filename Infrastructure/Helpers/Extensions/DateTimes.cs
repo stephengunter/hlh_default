@@ -52,6 +52,7 @@ public static class DateTimeHelpers
 
    public static DateTime ToStartDate(this DateTime date)
 		=> new DateTime(date.Year, date.Month, date.Day, 0, 0, 0);
+
 	public static DateTime? ToStartDate(this string? input)
 	{
 		if (string.IsNullOrEmpty(input)) return null;

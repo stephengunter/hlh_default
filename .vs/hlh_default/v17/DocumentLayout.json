@@ -1,111 +1,12 @@
 {
   "Version": 1,
   "WorkspaceRootPath": "C:\\Users\\stephen\\source\\repos\\csharp\\hlh_default\\",
-  "Documents": [
-    {
-      "AbsoluteMoniker": "D:0:0:{03016527-AACF-4391-9744-59392859C623}|ITApi\\ITApi.csproj|c:\\users\\stephen\\source\\repos\\csharp\\hlh_default\\itapi\\controllers\\admin\\itemtransactionscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{03016527-AACF-4391-9744-59392859C623}|ITApi\\ITApi.csproj|solutionrelative:itapi\\controllers\\admin\\itemtransactionscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{03016527-AACF-4391-9744-59392859C623}|ITApi\\ITApi.csproj|c:\\users\\stephen\\source\\repos\\csharp\\hlh_default\\itapi\\controllers\\admin\\itemscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{03016527-AACF-4391-9744-59392859C623}|ITApi\\ITApi.csproj|solutionrelative:itapi\\controllers\\admin\\itemscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{03016527-AACF-4391-9744-59392859C623}|ITApi\\ITApi.csproj|c:\\users\\stephen\\source\\repos\\csharp\\hlh_default\\itapi\\models\\items.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{03016527-AACF-4391-9744-59392859C623}|ITApi\\ITApi.csproj|solutionrelative:itapi\\models\\items.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{03016527-AACF-4391-9744-59392859C623}|ITApi\\ITApi.csproj|c:\\users\\stephen\\source\\repos\\csharp\\hlh_default\\itapi\\models\\itemtransactions.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{03016527-AACF-4391-9744-59392859C623}|ITApi\\ITApi.csproj|solutionrelative:itapi\\models\\itemtransactions.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{2A48B911-91BB-48FE-80DA-E4C5D08D803E}|ApplicationCore\\ApplicationCore.csproj|c:\\users\\stephen\\source\\repos\\csharp\\hlh_default\\applicationcore\\models\\it\\item.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{2A48B911-91BB-48FE-80DA-E4C5D08D803E}|ApplicationCore\\ApplicationCore.csproj|solutionrelative:applicationcore\\models\\it\\item.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    }
-  ],
+  "Documents": [],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
       "VerticalTabListWidth": 256,
-      "DocumentGroups": [
-        {
-          "DockedWidth": 93,
-          "SelectedChildIndex": 0,
-          "Children": [
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "Items.cs",
-              "DocumentMoniker": "C:\\Users\\stephen\\source\\repos\\csharp\\hlh_default\\ITApi\\Models\\Items.cs",
-              "RelativeDocumentMoniker": "ITApi\\Models\\Items.cs",
-              "ToolTip": "C:\\Users\\stephen\\source\\repos\\csharp\\hlh_default\\ITApi\\Models\\Items.cs",
-              "RelativeToolTip": "ITApi\\Models\\Items.cs",
-              "ViewState": "AgIAAAMAAAAAAAAAAAAAABUAAABYAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-14T06:11:22.881Z",
-              "EditorCaption": ""
-            }
-          ]
-        },
-        {
-          "DockedWidth": 286,
-          "SelectedChildIndex": 0,
-          "Children": [
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "ItemTransactionsController.cs",
-              "DocumentMoniker": "C:\\Users\\stephen\\source\\repos\\csharp\\hlh_default\\ITApi\\Controllers\\Admin\\ItemTransactionsController.cs",
-              "RelativeDocumentMoniker": "ITApi\\Controllers\\Admin\\ItemTransactionsController.cs",
-              "ToolTip": "C:\\Users\\stephen\\source\\repos\\csharp\\hlh_default\\ITApi\\Controllers\\Admin\\ItemTransactionsController.cs",
-              "RelativeToolTip": "ITApi\\Controllers\\Admin\\ItemTransactionsController.cs",
-              "ViewState": "AgIAAKMAAAAAAAAAAIAywK0AAAAvAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-14T07:20:35.939Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "ItemTransactions.cs",
-              "DocumentMoniker": "C:\\Users\\stephen\\source\\repos\\csharp\\hlh_default\\ITApi\\Models\\ItemTransactions.cs",
-              "RelativeDocumentMoniker": "ITApi\\Models\\ItemTransactions.cs",
-              "ToolTip": "C:\\Users\\stephen\\source\\repos\\csharp\\hlh_default\\ITApi\\Models\\ItemTransactions.cs",
-              "RelativeToolTip": "ITApi\\Models\\ItemTransactions.cs",
-              "ViewState": "AgIAABsAAAAAAAAAAAAAACgAAABYAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-14T06:38:46.878Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "ItemsController.cs",
-              "DocumentMoniker": "C:\\Users\\stephen\\source\\repos\\csharp\\hlh_default\\ITApi\\Controllers\\Admin\\ItemsController.cs",
-              "RelativeDocumentMoniker": "ITApi\\Controllers\\Admin\\ItemsController.cs",
-              "ToolTip": "C:\\Users\\stephen\\source\\repos\\csharp\\hlh_default\\ITApi\\Controllers\\Admin\\ItemsController.cs",
-              "RelativeToolTip": "ITApi\\Controllers\\Admin\\ItemsController.cs",
-              "ViewState": "AgIAAF0AAAAAAAAAAAAAAHEAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-14T06:13:33.546Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "Item.cs",
-              "DocumentMoniker": "C:\\Users\\stephen\\source\\repos\\csharp\\hlh_default\\ApplicationCore\\Models\\IT\\Item.cs",
-              "RelativeDocumentMoniker": "ApplicationCore\\Models\\IT\\Item.cs",
-              "ToolTip": "C:\\Users\\stephen\\source\\repos\\csharp\\hlh_default\\ApplicationCore\\Models\\IT\\Item.cs",
-              "RelativeToolTip": "ApplicationCore\\Models\\IT\\Item.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAAhAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-14T06:11:31.574Z",
-              "EditorCaption": ""
-            }
-          ]
-        }
-      ]
+      "DocumentGroups": []
     }
   ]
 }

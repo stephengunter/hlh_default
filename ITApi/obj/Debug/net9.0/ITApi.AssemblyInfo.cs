@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ITApi")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+8ed72cf8225f5689886d4b69ffcda312d54fefdd")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+fd2fdea9e2a4f74cc1910ab70b88d527b8d0b657")]
 [assembly: System.Reflection.AssemblyProductAttribute("ITApi")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ITApi")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

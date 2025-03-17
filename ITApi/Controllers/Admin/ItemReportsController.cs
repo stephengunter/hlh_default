@@ -1,18 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
-using ApplicationCore.Consts;
-using Infrastructure.Helpers;
-using ApplicationCore.Authorization;
 using ApplicationCore.Models.IT;
 using ApplicationCore.Views.IT;
-using Ardalis.Specification;
 using AutoMapper;
 using ApplicationCore.Web.Controllers;
 using ApplicationCore.Helpers.Identity;
 using ApplicationCore.Services.IT;
-using Infrastructure.Helpers;
 using ITApi.Models;
-using ApplicationCore.Models.Identity;
-using Microsoft.AspNetCore.Hosting.Server;
 
 namespace ITApi.Controllers.Admin;
 
@@ -41,8 +34,9 @@ public class ItemReportsController : BaseAdminController
    [HttpGet]
    public async Task<ActionResult<ICollection<ItemReportViewModel>>> Index(int year)
    {
-      var list = await _reportsService.FetchAsync(year);
-      
+      var list = await _reportsService.FetchAsync(year); 
+      var lastYearClose = list.FirstOrDefault(x => x.Month == 0);
+
       return list.MapViewModelList(_mapper);
    }
    [HttpGet("{id}")]

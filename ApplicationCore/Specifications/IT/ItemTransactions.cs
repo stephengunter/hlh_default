@@ -4,19 +4,9 @@ using Infrastructure.Helpers;
 
 namespace ApplicationCore.Specifications.IT;
 
-public class ItemTransactionsMinYearSpecification : Specification<ItemTransaction, int?>
+public abstract class BaseItemTransactionsSpecification : Specification<ItemTransaction>
 {
-   public ItemTransactionsMinYearSpecification()
-   {
-      Query.Select(b => (int?)b.Date.Year)
-           .OrderBy(b => b.Date.Year)
-           .Take(1);
-   }
-}
-
-public class ItemTransactionSpecification : Specification<ItemTransaction>
-{
-   public ItemTransactionSpecification(ICollection<string>? includes = null)
+   public BaseItemTransactionsSpecification(ICollection<string>? includes = null)
    {
       if (includes!.HasItems())
       {
@@ -27,53 +17,35 @@ public class ItemTransactionSpecification : Specification<ItemTransaction>
       }
       Query.Where(item => !item.Removed);
    }
-   public ItemTransactionSpecification(Item entity, ICollection<string>? includes = null)
-   {
-      if (includes!.HasItems())
-      {
-         foreach (var item in includes!)
-         {
-            Query.Include(item);
-         }
-      }
-      Query.Where(item => !item.Removed && item.ItemId == entity.Id);
-   }
-   public ItemTransactionSpecification(Item entity, DateTime sinceDate, DateTime endDate, ICollection<string>? includes = null)
-   {
-      if (includes!.HasItems())
-      {
-         foreach (var item in includes!)
-         {
-            Query.Include(item);
-         }
-      }
-      Query.Where(item => !item.Removed && item.ItemId == entity.Id &&
-                  item.Date >= sinceDate && item.Date <= endDate);
-   }
-   public ItemTransactionSpecification(DateTime sinceDate, DateTime endDate, ICollection<string>? includes = null)
-   {
-      if (includes!.HasItems())
-      {
-         foreach (var item in includes!)
-         {
-            Query.Include(item);
-         }
-      }
-      Query.Where(item => !item.Removed && item.Date >= sinceDate && item.Date <= endDate);
-   }
 }
 
-public class ItemTransactionYearMonthSpecification : Specification<ItemTransaction>
+public class ItemTransactionSpecification : BaseItemTransactionsSpecification
 {
-   public ItemTransactionYearMonthSpecification(int year, int month, ICollection<string>? includes = null)
+   public ItemTransactionSpecification(ICollection<string>? includes = null) : base(includes)
    {
-      if (includes!.HasItems())
-      {
-         foreach (var item in includes!)
-         {
-            Query.Include(item);
-         }
-      }
-      Query.Where(item => !item.Removed && item.Date.Year == year && item.Date.Month == month);
+   }
+   public ItemTransactionSpecification(Item entity, ICollection<string>? includes = null) : base(includes)
+   {
+      Query.Where(item => item.ItemId == entity.Id);
+   }
+}
+public class ItemTransactionDateSpecification : BaseItemTransactionsSpecification
+{
+   public ItemTransactionDateSpecification(DateTime sinceDate, ICollection<string>? includes = null) : base(includes)
+   {
+      Query.Where(item => item.Date >= sinceDate);
+   }
+   public ItemTransactionDateSpecification(DateTime sinceDate, Item entity, ICollection<string>? includes = null) : base(includes)
+   {
+      Query.Where(item => item.Date >= sinceDate && item.ItemId == entity.Id);
+   }
+   public ItemTransactionDateSpecification(DateTime sinceDate, DateTime endDate, ICollection<string>? includes = null) : base(includes)
+   {
+      Query.Where(item => item.Date >= sinceDate && item.Date <= endDate);
+   }
+   public ItemTransactionDateSpecification(DateTime sinceDate, DateTime endDate, Item entity, ICollection<string>? includes = null) : base(includes)
+   {
+      Query.Where(item => item.ItemId == entity.Id &&
+                  item.Date >= sinceDate && item.Date <= endDate);
    }
 }

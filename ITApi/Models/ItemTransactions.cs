@@ -68,5 +68,5 @@ public class ItemTransactionAddForm : BaseItemTransactionForm
 }
 public class ItemTransactionEditForm : BaseItemTransactionForm
 {
-   
+   public bool CanRemove { get; set; }
 }

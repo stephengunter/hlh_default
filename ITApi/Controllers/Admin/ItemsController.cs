@@ -1,38 +1,46 @@
 using Microsoft.AspNetCore.Mvc;
-using ApplicationCore.Consts;
 using Infrastructure.Helpers;
 using ApplicationCore.Authorization;
 using ApplicationCore.Models.IT;
-using ApplicationCore.Views.IT;
 using Ardalis.Specification;
 using AutoMapper;
 using ApplicationCore.Web.Controllers;
 using ApplicationCore.Helpers.Identity;
 using ApplicationCore.Services.IT;
 using ITApi.Models;
-using Azure.Core;
 using ApplicationCore.Services.Identity;
-using System;
 
 namespace ITApi.Controllers.Admin;
 
 public class ItemsController : BaseAdminController
 {
    private readonly IItemService _itemService;
-   private readonly IDepartmentsService _departmentsService;
+   private readonly IItemTransactionService _transactionService;
+   private readonly IItemReportService _itemReportService;
+   private readonly IItemBalanceSheetService _itemBalanceSheetService;
    private readonly IMapper _mapper;
 
-   public ItemsController(IItemService itemService, IDepartmentsService departmentsService, IMapper mapper)
+   public ItemsController(IItemService itemService, IDepartmentsService departmentsService,
+      IItemTransactionService transactionService, IItemReportService itemReportService,
+      IItemBalanceSheetService itemBalanceSheetService, IMapper mapper)
    {
-      _itemService = itemService; 
-      _departmentsService = departmentsService;
+      _itemService = itemService;
+      _transactionService = transactionService;
+      _itemReportService = itemReportService;
+      _itemBalanceSheetService = itemBalanceSheetService;
       _mapper = mapper;
    }
 
-   [HttpGet("init")]
-   public async Task<ActionResult<ItemsIndexModel>> Init()
+   bool CanRemove(Item entity)
    {
-      var model = new ItemsIndexModel(new ItemsFetchRequest(true));
+      if (entity.Active) return false;
+      return true;
+   }
+
+   [HttpGet("init")]
+   public async Task<ActionResult<ItemsAdminModel>> Init()
+   {
+      var model = new ItemsAdminModel(new ItemsFetchRequest(true));
 
       var items = await _itemService.FetchAsync();
       items = items.Where(x => x.Active).ToList();
@@ -42,11 +50,40 @@ public class ItemsController : BaseAdminController
    }
 
    [HttpGet]   
-   public async Task<ActionResult<ICollection<ItemViewModel>>> Index(bool active)
+   public async Task<ActionResult<ItemsIndexModel>> Index(bool active)
    {
       var items = await _itemService.FetchAsync();
       items = items.Where(x => x.Active == active);
-      return items.MapViewModelList(_mapper);
+
+      if (!active) return new ItemsIndexModel(items.MapViewModelList(_mapper));
+
+      var lastClosed = await _itemReportService.GetLastClosedAsync();
+      var sheets = await _itemBalanceSheetService.FetchAsync(lastClosed!);
+
+      var date = lastClosed!.GetDate();
+      var transactions = await _transactionService.FetchAsync(date!.Value.AddDays(1));
+      var year_transactions = await _transactionService.FetchAsync(DateTime.Today.AddYears(-1));
+      foreach (var item in items)
+      {
+         int lastStock = 0;
+         var sh = sheets.FirstOrDefault(x => x.ItemId == item.Id);
+         if (sh != null) lastStock = sh.Stock;
+
+         var trans = transactions.Where(x => x.ItemId == item.Id);
+         if (trans.IsNullOrEmpty()) item.Stock = lastStock;
+         else item.Stock = lastStock + trans.Sum(x => x.Quantity);
+
+         var itemYearTransactions = year_transactions.Where(x => x.ItemId == item.Id && x.Quantity > 0);
+         if (itemYearTransactions.IsNullOrEmpty()) item.SaveStock = 0;
+         else item.SaveStock = itemYearTransactions.Sum(x => x.Quantity);
+
+      }
+
+      items = items.OrderByDescending(x => x.SaveStock);
+
+      var model = new ItemsIndexModel(items.MapViewModelList(_mapper));
+      model.LastClosed = lastClosed!.MapViewModel(_mapper);
+      return model;
    }
    [HttpGet("create")]
    public ActionResult<ItemAddForm> Create()
@@ -73,7 +110,9 @@ public class ItemsController : BaseAdminController
 
       var form = new ItemEditForm();
       entity.SetValuesTo(form);
-      form.Active = entity.Order > -1;
+      form.Active = entity.Active;
+
+      form.CanRemove = CanRemove(entity);
       return form;
    }
    [HttpPut("{id}")]
@@ -91,31 +130,22 @@ public class ItemsController : BaseAdminController
       await _itemService.UpdateAsync(entity, User.Id());
       return NoContent();
    }
-   //[HttpPut("reset-client-secret/{id}")]
-   //public async Task<IActionResult> ResetClientSecret(int id)
-   //{
-   //   var app = await _appService.GetByIdAsync(id);
-   //   if (app == null) return NotFound();
+   [HttpDelete("{id}")]
+   public async Task<IActionResult> Remove(int id)
+   {
+      var entity = await _itemService.GetByIdAsync(id);
+      if (entity == null) return NotFound();
 
-   //   if (!app.Type.EqualTo(AppTypes.Api))
-   //   {
-   //      ModelState.AddModelError("type", "AppType Not Valid.");
-   //      return BadRequest(ModelState);
-   //   }
+      if (!CanRemove(entity))
+      {
+         ModelState.AddModelError("active", "此紀錄不允許刪除");
+         return BadRequest(ModelState);
+      }
 
-   //   await _appService.ResetClientSecretAsync(app);
-   //   return NoContent();
-   //}
-   //[HttpDelete("{id}")]
-   //public async Task<IActionResult> Remove(int id)
-   //{
-   //   var app = await _appService.GetByIdAsync(id);
-   //   if (app == null) return NotFound();
+      await _itemService.RemoveAsync(entity, User.Id());
 
-   //   await _appService.RemoveAsync(app, User.Id());
-
-   //   return NoContent();
-   //}
+      return NoContent();
+   }
 
    async Task ValidateRequestAsync(BaseItemForm model, int id = 0)
    {
@@ -138,28 +168,4 @@ public class ItemsController : BaseAdminController
          ModelState.AddModelError(nameof(model.Code), ValidationMessages.Duplicate(labels.Code));
       }
    }
-
-   //void ValidateType(string type)
-   //{
-   //   if (string.IsNullOrEmpty(type))
-   //   {
-   //      ModelState.AddModelError("type", ValidationMessages.Required(type));
-   //   }
-
-   //   if (type.EqualTo(AppTypes.Spa) || type.EqualTo(AppTypes.Api)) return;
-   //   ModelState.AddModelError("type", ValidationMessages.NotExist("type"));
-
-   //}
-   //void ValidateUrl(BaseAppForm model)
-   //{
-   //   if (string.IsNullOrEmpty(model.Url))
-   //   {
-   //      ModelState.AddModelError(nameof(model.Url), ValidationMessages.Required("Url"));
-   //   }
-   //   if (!model.Url!.IsValidUrl())
-   //   {
-   //      ModelState.AddModelError(nameof(model.Url), ValidationMessages.WrongFormatOf("Url"));
-   //   }
-
-   //}
 }

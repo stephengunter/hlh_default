@@ -19,6 +19,4 @@ public class ItemReportViewModel : EntityBaseView, IBaseRecordView
    public string CreatedAtText => CreatedAt.ToDateTimeString();
    public string LastUpdatedText => LastUpdated.ToDateTimeString();
 
-   public List<ItemBalanceSheetViewModel> ItemBalanceSheets { get; set; } = new List<ItemBalanceSheetViewModel>();
-
 }

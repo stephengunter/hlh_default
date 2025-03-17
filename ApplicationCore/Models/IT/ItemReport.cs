@@ -1,4 +1,5 @@
 ﻿using Infrastructure.Entities;
+using Infrastructure.Helpers;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ApplicationCore.Models.IT;
@@ -15,6 +16,14 @@ public class ItemReport : EntityBase, IBaseRecord
    public string CreatedBy { get; set; } = string.Empty;
    public DateTime? LastUpdated { get; set; }
    public string? UpdatedBy { get; set; }
+
+   public DateTime? GetDate()
+   {
+      if (string.IsNullOrEmpty(Date)) return null;
+      var parts = Date.Split("-");
+      int year = parts[0].ToInt().ROCYearToBC();
+      return new DateTime(year, parts[1].ToInt(), parts[2].ToInt());
+   }
 
    public virtual ICollection<ItemBalanceSheet> ItemBalanceSheets { get; set; } = new List<ItemBalanceSheet>();
 }

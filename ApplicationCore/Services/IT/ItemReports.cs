@@ -9,6 +9,7 @@ public interface IItemReportService
 {
    Task<IEnumerable<int>> FetchYearsAsync();
    Task<IEnumerable<ItemReport>> FetchAsync(int year);
+   Task<ItemReport?> GetLastClosedAsync();
    Task<ItemReport?> GetByIdAsync(int id);
    Task<ItemReport> CreateAsync(ItemReport entity, string userId);
    Task UpdateAsync(ItemReport entity, string userId);
@@ -32,6 +33,8 @@ public class ItemReportService : IItemReportService
       var list = await _repository.ListAsync();
       return list.Select(x => x.Year).Distinct().OrderByDescending(year => year);
    }
+   public async Task<ItemReport?> GetLastClosedAsync()
+      => await _repository.FirstOrDefaultAsync(new ItemReportLastClosedSpecification());
 
    public async Task<ItemReport?> GetByIdAsync(int id)
       => await _repository.GetByIdAsync(id);
