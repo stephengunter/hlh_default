@@ -10,5 +10,20 @@ public static class BaseCategoriesHelpers
       if(entity.SubItems.HasItems()) entity.SubIds!.AddRangeIfNotExists(entity.SubItems.Select(c => c.Id));
       foreach (var item in entity.SubItems) item.LoadSubItems(categories);
    }
+   public static List<T> GetAllSubItems<T>(this T root) where T : IBaseCategory<T>
+   {
+      var result = new List<T>();
+      if (root.SubItems != null)
+      {
+         foreach (var subItem in root.SubItems)
+         {
+            result.Add(subItem);
+            result.AddRange(subItem.GetAllSubItems());
+         }
+      }
+      return result;
+   }
+
+
 
 }

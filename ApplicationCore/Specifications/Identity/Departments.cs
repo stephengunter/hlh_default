@@ -2,41 +2,49 @@ using Ardalis.Specification;
 using ApplicationCore.Models.Identity;
 
 namespace ApplicationCore.Specifications.Identity;
-public class DepartmentSpecification : Specification<Department>
+
+public abstract class BaseDepartmentSpecification : Specification<Department>
+{
+   public BaseDepartmentSpecification()
+   {
+      Query.Where(item => !item.Removed);
+   }
+}
+public class DepartmentSpecification : BaseDepartmentSpecification
 {
 	public DepartmentSpecification()
 	{
-		Query.Where(item => !item.Removed);
+		
 	}
    public DepartmentSpecification(string key)
    {
-      Query.Where(item => !item.Removed).Where(item => item.Key == key);
+      Query.Where(item => item.Key == key);
    }
    
    public DepartmentSpecification(IEnumerable<int> ids)
    {
-      Query.Where(item => !item.Removed).Where(item => ids.Contains(item.Id));
+      Query.Where(item => ids.Contains(item.Id));
    }
 }
-public class DepartmentRootSpecification : Specification<Department>
+public class DepartmentRootSpecification : BaseDepartmentSpecification
 {
    public DepartmentRootSpecification()
    {
-      Query.Where(item => !item.Removed).Where(item => item.ParentId == null || item.ParentId == 0);
+      Query.Where(item => item.ParentId == null || item.ParentId == 0);
    }
 }
-public class DepartmentParentSpecification : Specification<Department>
+public class DepartmentParentSpecification : BaseDepartmentSpecification
 {
    public DepartmentParentSpecification(Department parent)
    {
-      Query.Where(item => !item.Removed).Where(item => item.ParentId == parent.Id);
+      Query.Where(item => item.ParentId == parent.Id);
    }
 }
-public class DepartmentTitleSpecification : Specification<Department>
+public class DepartmentTitleSpecification : BaseDepartmentSpecification
 {
    public DepartmentTitleSpecification(string title)
    {
-      Query.Where(item => !item.Removed).Where(item => item.Title == title);
+      Query.Where(item => item.Title == title);
    }
 }
 

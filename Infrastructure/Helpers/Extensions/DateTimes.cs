@@ -113,6 +113,27 @@ public static class DateTimeHelpers
       }
 
    }
+   public static DateTime? RocToDatetime(this int val)
+   {
+      var strVal = val.ToString();
+		if (strVal.Length == 7)
+		{
+         int year = strVal.Substring(0, 3).ToInt();
+         int month = strVal.Substring(3, 2).ToInt();
+         int day = strVal.Substring(5, 2).ToInt();
+
+         return new DateTime(year + 1911, month, day);
+      }
+      if (strVal.Length == 6)
+      {
+         int year = strVal.Substring(0, 2).ToInt();
+         int month = strVal.Substring(2, 2).ToInt();
+         int day = strVal.Substring(4, 2).ToInt();
+
+         return new DateTime(year + 1911, month, day);
+      }
+		return null;      
+   }
    public static DateTime ToDatetime(this int val)
 	{
 		var strVal = val.ToString();
@@ -162,7 +183,14 @@ public static class DateTimeHelpers
 		return hour + minute + second + mileSecond;
 
 	}
-	public static int ToDateNumber(this DateTime input) => Convert.ToInt32(GetDateString(input.Date));
+   public static DateTime? ToNullableDateTime(this object dbValue)
+   {
+      if (dbValue == DBNull.Value || dbValue == null) return null;
+      if (DateTime.TryParse(dbValue.ToString(), out DateTime result)) return result;
+
+      return null;
+   }
+   public static int ToDateNumber(this DateTime input) => Convert.ToInt32(GetDateString(input.Date));
 	public static int ToTimeNumber(this DateTime input) => Convert.ToInt32(GetTimeString(input));
 	public static string ToDateString(this DateTime input) => input.ToString("yyyy-MM-dd");
 	public static string ToDateString(this DateTime? input) => input.HasValue ? input.Value.ToDateString() : string.Empty;

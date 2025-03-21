@@ -16,23 +16,67 @@ using System.Security.Principal;
 using ApplicationCore.DataAccess;
 using System.Linq;
 using ApplicationCore.Models.IT;
+using ApplicationCore.Views.Identity.AD;
 
 namespace IdentityWeb.Controllers.Tests;
 
 public class AATestsController : BaseTestController
 {
    private readonly IAppService _appService;
+   private readonly IUsersService _usersService;
+   private readonly IProfilesService _profilesService;
+   private readonly IDepartmentsService _departmentsService;
    private readonly IMapper _mapper;
 
-   public AATestsController(IAppService appService, IMapper mapper)
+   public AATestsController(IUsersService usersService, IProfilesService profilesService, 
+      IAppService appService, IDepartmentsService departmentsService, IMapper mapper)
    {
+      _usersService = usersService;
       _appService = appService;
+      _profilesService = profilesService;
+      _departmentsService = departmentsService;
       _mapper = mapper;
    }
    [HttpGet]
    public async Task<ActionResult> Index()
    {
-      
+      var department = await _departmentsService.FindByTitleAsync("°|ªø«Ç");
+
+      var user = await _usersService.FindByUsernameAsync("hlhsec01");
+      if (user == null)
+      {
+         user = await _usersService.CreateAsync(new User
+         {
+            UserName = "hlhsec01",
+            Name = "hlhsec01",
+            SecurityStamp = Guid.NewGuid().ToString(),
+            Active = true,
+            CreatedAt = DateTime.Now,
+            CreatedBy = "f2003188-0fd4-4c49-aad1-3f7f9bd6338c"
+         });
+      }
+
+      var profiles = await _profilesService.FindAsync(user);
+      if (profiles == null)
+      {
+         profiles = await _profilesService.CreateAsync(new Profiles
+         {
+            UserId = user.Id,
+            Name = "¾H·ç¶³",
+            DepartmentId = department.Id,
+            CreatedAt = DateTime.Now,
+            CreatedBy = "f2003188-0fd4-4c49-aad1-3f7f9bd6338c"
+         });
+      }
+      else
+      {
+         profiles.Name = "¾H·ç¶³";
+         profiles.DepartmentId = department.Id;
+         profiles.LastUpdated = DateTime.Now;
+         profiles.UpdatedBy = "f2003188-0fd4-4c49-aad1-3f7f9bd6338c";
+
+         await _profilesService.UpdateAsync(profiles);
+      }
       return Ok();
    }
    //[HttpGet]

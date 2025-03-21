@@ -8,9 +8,7 @@ public class Profiles : IAggregateRoot, IBaseRecord
 {
    [Key]
 	public string UserId { get; set; } = String.Empty;
-
    public string Name { get; set; } = String.Empty;
-
    public string? Ps { get; set; }
 
    public DateTime CreatedAt { get; set; } = DateTime.Now;

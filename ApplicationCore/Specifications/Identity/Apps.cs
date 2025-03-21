@@ -1,25 +1,32 @@
 ﻿using Ardalis.Specification;
 using ApplicationCore.Models.Identity;
+using ApplicationCore.Models.IT;
 
 namespace ApplicationCore.Specifications.Identity;
 
-public class AppsSpecification : Specification<App>
+public abstract class BaseAppsSpecification : Specification<App>
+{
+   public BaseAppsSpecification()
+   {
+      Query.Where(item => !item.Removed);
+   }
+}
+public class AppsSpecification : BaseAppsSpecification
 {
    public AppsSpecification()
    {
-      Query.Where(x => !x.Removed);
    }
    public AppsSpecification(int id)
    {
-      Query.Where(x => !x.Removed && x.Id == id);
+      Query.Where(x => x.Id == id);
    }
    public AppsSpecification(string clientId)
    {
-      Query.Where(x => !x.Removed && x.ClientId == clientId);
+      Query.Where(x => x.ClientId == clientId);
    }
    public AppsSpecification(IEnumerable<int> ids)
    {
-      Query.Where(item => !item.Removed).Where(item => ids.Contains(item.Id));
+      Query.Where(item => ids.Contains(item.Id));
    }
 }
 

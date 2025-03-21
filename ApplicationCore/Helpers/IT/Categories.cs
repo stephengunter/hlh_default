@@ -4,7 +4,7 @@ using ApplicationCore.Views.IT;
 using AutoMapper;
 using Infrastructure.Paging;
 
-namespace ApplicationCore.Helpers.Identity;
+namespace ApplicationCore.Helpers.IT;
 
 public static class CategoryHelpers
 {
@@ -14,8 +14,6 @@ public static class CategoryHelpers
 
       return model;
    }
-
-
    public static List<CategoryViewModel> MapViewModelList(this IEnumerable<Category> categories, IMapper mapper)
       => categories.Select(item => MapViewModel(item, mapper)).ToList();
 

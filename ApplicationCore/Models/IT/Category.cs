@@ -22,12 +22,14 @@ public class Category : EntityBase, IBaseCategory<Category>, IRemovable, ISortab
    [NotMapped]
    public ICollection<int>? SubIds { get; set; }
 
+   public bool Abstract { get; set; }
    public bool Removed { get; set; }
    public int Order { get; set; }
 
    public bool Active => ISortableHelpers.IsActive(this);
 
-   public void LoadSubItems(IEnumerable<IBaseCategory<Category>> categories) => BaseCategoriesHelpers.LoadSubItems(this, categories);   
+   public void LoadSubItems(IEnumerable<IBaseCategory<Category>> categories) => BaseCategoriesHelpers.LoadSubItems(this, categories);
+   public ICollection<Category> GetAllSubItems() => BaseCategoriesHelpers.GetAllSubItems(this);
 
 }
 

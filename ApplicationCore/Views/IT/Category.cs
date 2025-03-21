@@ -1,4 +1,5 @@
-﻿using Infrastructure.Entities;
+﻿using ApplicationCore.Models.IT;
+using Infrastructure.Entities;
 using Infrastructure.Views;
 
 namespace ApplicationCore.Views.IT;
@@ -16,6 +17,7 @@ public class CategoryViewModel : EntityBaseView, IBaseCategoryView<CategoryViewM
    public bool IsRootItem => ParentId is null;
 
    public ICollection<CategoryViewModel>? SubItems { get; set; }
+   public ICollection<CategoryViewModel>? AllSubItems { get; set; }
    public ICollection<int>? SubIds { get; set; }
 
    public bool Removed { get; set; }

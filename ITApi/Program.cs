@@ -50,6 +50,7 @@ try
    services.Configure<AuthSettings>(Configuration.GetSection(SettingsKeys.Auth));
    services.Configure<CompanySettings>(Configuration.GetSection(SettingsKeys.Company));
    services.Configure<ItemTransactionSettings>(Configuration.GetSection(SettingsKeys.ItemTransaction));
+   services.Configure<HLHDBSettings>(Configuration.GetSection("HLHDB"));
    #endregion
 
    string clientId = Configuration[$"{SettingsKeys.OpenIddict}:ClientId"]!;

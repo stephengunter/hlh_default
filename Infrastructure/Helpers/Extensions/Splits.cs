@@ -22,10 +22,10 @@ public static class SplitHelpers
 		return list;
 	}
 
-	public static string JoinToString(this IEnumerable<string>? list)
+	public static string JoinToString(this IEnumerable<string>? list, string splitBy = ",")
 	{
 		if (list.IsNullOrEmpty()) return string.Empty;
-		return String.Join(",", list!);
+		return String.Join(splitBy, list!);
 	}
 
 	public static string JoinToStringIntegers(this List<int> list, bool greaterThanZero = false)

@@ -4,7 +4,7 @@ using ApplicationCore.Views.IT;
 using AutoMapper;
 using Infrastructure.Paging;
 
-namespace ApplicationCore.Helpers.Identity;
+namespace ApplicationCore.Helpers.IT;
 public static class ItemReportHelpers
 {
    public static ItemReportViewModel MapViewModel(this ItemReport entity, IMapper mapper)

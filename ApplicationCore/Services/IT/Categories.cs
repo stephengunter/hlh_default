@@ -1,48 +1,49 @@
 ﻿using ApplicationCore.DataAccess;
 using ApplicationCore.Models.IT;
 using ApplicationCore.Specifications.IT;
+using Ardalis.Specification;
+using Infrastructure.Interfaces;
 
 namespace ApplicationCore.Services.IT;
 
-public interface ICategorysService
+public interface ICategoryService
 {
-   Task<IEnumerable<Category>> FindRootAsync(string postType);
-
-   Task<IEnumerable<Category>> FetchByKeysAsync(string postType, IList<string> keys);
-   Task<IEnumerable<Category>> FetchAllAsync();
-
-   Task<Category?> GetByKeyAsync(string postType, string key);
-   Task<Category?> GetByIdAsync(int id);
-
+   Task<IEnumerable<Category>> FetchAsync(string entityType);
+   Task<Category?> GetByIdAsync(int id, bool subItems = false);
    Task<Category> CreateAsync(Category Category);
    Task UpdateAsync(Category Category);
+   Task UpdateRangeAsync(ICollection<Category> entities);
 }
 
-public class CategorysService : ICategorysService
+public class CategorysService : ICategoryService
 {
-   private readonly IDefaultRepository<Category> _categorysRepository;
+   private readonly IDefaultRepository<Category> _repository;
 
-   public CategorysService(IDefaultRepository<Category> categorysRepository)
+   public CategorysService(IDefaultRepository<Category> repository)
    {
-      _categorysRepository = categorysRepository;
+      _repository = repository;
    }
-   public async Task<IEnumerable<Category>> FindRootAsync(string postType)
-       => await _categorysRepository.ListAsync(new RootCategoriesSpecification(postType));
-   public async Task<Category?> GetByKeyAsync(string postType, string key)
-       => await _categorysRepository.FirstOrDefaultAsync(new CategoriesSpecification(postType, key));
+   public async Task<IEnumerable<Category>> FetchAsync(string entityType)
+      => await _repository.ListAsync(new CategoriesSpecification(entityType));
 
-   public async Task<IEnumerable<Category>> FetchByKeysAsync(string postType, IList<string> keys)
-   => await _categorysRepository.ListAsync(new CategoriesSpecification(postType, keys));
-   public async Task<IEnumerable<Category>> FetchAllAsync()
-      => await _categorysRepository.ListAsync(new CategoriesSpecification());
+   public async Task<Category?> GetByIdAsync(int id, bool subItems = false)
+   { 
+      var entity = await _repository.GetByIdAsync(id);
+      if (!subItems) return entity;
+      if(entity is null) return null;
 
-   public async Task<Category?> GetByIdAsync(int id)
-      => await _categorysRepository.GetByIdAsync(id);
+      var categories = await FetchAsync(entity.EntityType);
+      entity.LoadSubItems(categories);
+      return entity;
+   }
 
    public async Task<Category> CreateAsync(Category Category)
-      => await _categorysRepository.AddAsync(Category);
+      => await _repository.AddAsync(Category);
 
    public async Task UpdateAsync(Category Category)
-   => await _categorysRepository.UpdateAsync(Category);
+      => await _repository.UpdateAsync(Category);
+
+   public async Task UpdateRangeAsync(ICollection<Category> entities)
+      => await _repository.UpdateRangeAsync(entities);
 
 }

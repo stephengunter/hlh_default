@@ -1,12 +1,77 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Users\\stephen\\source\\repos\\csharp\\hlh_default\\",
-  "Documents": [],
+  "WorkspaceRootPath": "C:\\Users\\Administrator\\source\\repos\\csharp\\hlh_default\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{03016527-AACF-4391-9744-59392859C623}|ITApi\\ITApi.csproj|c:\\users\\administrator\\source\\repos\\csharp\\hlh_default\\itapi\\models\\properties\\properties.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{03016527-AACF-4391-9744-59392859C623}|ITApi\\ITApi.csproj|solutionrelative:itapi\\models\\properties\\properties.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2A48B911-91BB-48FE-80DA-E4C5D08D803E}|ApplicationCore\\ApplicationCore.csproj|c:\\users\\administrator\\source\\repos\\csharp\\hlh_default\\applicationcore\\helpers\\it\\properties\\properties.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2A48B911-91BB-48FE-80DA-E4C5D08D803E}|ApplicationCore\\ApplicationCore.csproj|solutionrelative:applicationcore\\helpers\\it\\properties\\properties.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{03016527-AACF-4391-9744-59392859C623}|ITApi\\ITApi.csproj|c:\\users\\administrator\\source\\repos\\csharp\\hlh_default\\itapi\\controllers\\admin\\properties\\propertiescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{03016527-AACF-4391-9744-59392859C623}|ITApi\\ITApi.csproj|solutionrelative:itapi\\controllers\\admin\\properties\\propertiescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
       "VerticalTabListWidth": 256,
-      "DocumentGroups": []
+      "DocumentGroups": [
+        {
+          "DockedWidth": 172,
+          "SelectedChildIndex": 1,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "PropertiesController.cs",
+              "DocumentMoniker": "C:\\Users\\Administrator\\source\\repos\\csharp\\hlh_default\\ITApi\\Controllers\\Admin\\Properties\\PropertiesController.cs",
+              "RelativeDocumentMoniker": "ITApi\\Controllers\\Admin\\Properties\\PropertiesController.cs",
+              "ToolTip": "C:\\Users\\Administrator\\source\\repos\\csharp\\hlh_default\\ITApi\\Controllers\\Admin\\Properties\\PropertiesController.cs",
+              "RelativeToolTip": "ITApi\\Controllers\\Admin\\Properties\\PropertiesController.cs",
+              "ViewState": "AgIAABwAAAAAAAAAAIAwwCsAAAAzAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-03-21T08:58:42.326Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Properties.cs",
+              "DocumentMoniker": "C:\\Users\\Administrator\\source\\repos\\csharp\\hlh_default\\ITApi\\Models\\Properties\\Properties.cs",
+              "RelativeDocumentMoniker": "ITApi\\Models\\Properties\\Properties.cs",
+              "ToolTip": "C:\\Users\\Administrator\\source\\repos\\csharp\\hlh_default\\ITApi\\Models\\Properties\\Properties.cs",
+              "RelativeToolTip": "ITApi\\Models\\Properties\\Properties.cs",
+              "ViewState": "AgIAAAoAAAAAAAAAAAAiwBcAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-03-21T08:58:11.854Z",
+              "EditorCaption": ""
+            }
+          ]
+        },
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Properties.cs",
+              "DocumentMoniker": "C:\\Users\\Administrator\\source\\repos\\csharp\\hlh_default\\ApplicationCore\\Helpers\\IT\\Properties\\Properties.cs",
+              "RelativeDocumentMoniker": "ApplicationCore\\Helpers\\IT\\Properties\\Properties.cs",
+              "ToolTip": "C:\\Users\\Administrator\\source\\repos\\csharp\\hlh_default\\ApplicationCore\\Helpers\\IT\\Properties\\Properties.cs",
+              "RelativeToolTip": "ApplicationCore\\Helpers\\IT\\Properties\\Properties.cs",
+              "ViewState": "AgIAAEUAAAAAAAAAAAAAAFsAAAAzAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-03-21T09:19:50.219Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
     }
   ]
 }

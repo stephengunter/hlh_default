@@ -10,31 +10,84 @@ using OfficeOpenXml;
 using Infrastructure.Helpers;
 using ApplicationCore.Services.Identity;
 using ApplicationCore.Services;
+using ApplicationCore.Models.Identity;
+using ApplicationCore.Migrations;
+using ApplicationCore.Settings;
+using Microsoft.Extensions.Options;
+using ApplicationCore.Helpers.IT;
+using Polly;
+using ApplicationCore.Specifications.IT;
+using Infrastructure.Interfaces;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
+using Ardalis.Specification;
 
 namespace ITApi.Controllers.Tests;
 
 public class AATestsController : BaseTestController
 {
-   private readonly IAppUsersService _usersService;
-   private readonly IDepartmentsService _departmentsService;
-   private readonly IItemReportService _itemReportService;
-   private readonly IItemService _itemService;
-   private readonly IItemTransactionService _transactionService;
+   
+   private readonly DefaultContext _context;
+   private readonly IPropertyService _propertyService;
    private readonly IMapper _mapper;
-   public AATestsController(IAppUsersService usersService, IDepartmentsService departmentsService, IItemReportService itemReportService, IItemService itemService,
-      IItemTransactionService transactionService, IMapper mapper)
+   public AATestsController(DefaultContext context, IPropertyService propertyService, IMapper mapper)
    {
-      _usersService = usersService;
-      _departmentsService = departmentsService;
-      _itemReportService = itemReportService;
-      _itemService = itemService;
-      _transactionService = transactionService;
+      _context = context;
+      _propertyService = propertyService;
       _mapper = mapper;
+   }
+   [HttpGet("{input}")]
+   public async Task<ActionResult> Index(string input)
+   {
+      return Ok(input.ToPropNumber());
    }
    [HttpGet]
    public async Task<ActionResult> Index()
    {
+      
+      await _propertyService.RefreshAsync();
+      //string filePath = @"C:\temp\20250321\資訊財產物品帳.xlsx";
+      //var src = PropertyExcelHelpers.GetPropertyListFromFile(filePath);
+      //await _propertyService.SyncAsync(src);
+      //var categories = _context.Categories.Where(x => x.EntityType == nameof(Device)).ToList();
+      //foreach (var prop in prop_list)
+      //{
+      //   var category = categories.FirstOrDefault(x => x.Title == prop.CategoryName);
+      //   if (category is null) continue;
+
+      //   prop.CategoryId = category.Id;
+      //}
+
+      //_context.SaveChanges();
+      //  bool hasDuplicates = _context.Properties.GroupBy(p => p.Number).Any(g => g.Count() > 1);
+      //  var duplicateNumbers = _context.Properties
+      //.GroupBy(p => p.Number)
+      //.Where(g => g.Count() > 1)
+      //.Select(g => g.Key)
+      //.ToList();
+
+
+
       return Ok();
+   }
+
+   void test()
+   {
+      //var devices = _context.Devices.ToList();
+      //var categories = _context.Categories.ToList();
+      //foreach (var device in devices)
+      //{
+      //   string? num = device.No;
+      //   if (string.IsNullOrEmpty(num)) continue;
+      //   if (num.Length != 5) continue;
+      //   string code = num.Substring(0, 2);
+      //   if (code != "NB") continue;
+      //   var category = categories.FirstOrDefault(x => x.Key == code);
+      //   if (category is null) continue;
+      //   device.CategoryId = category.Id;
+      //}
+      //_context.SaveChanges();
    }
 
    //[HttpGet]
@@ -79,7 +132,7 @@ public class AATestsController : BaseTestController
    //         list.Add(tran);
    //      }
    //   }
-      
+
    //   list = list.Where(x => x.Date > new DateTime(2024, 12, 18)).ToList();
    //   await _transactionService.AddRangeAsync(list);
    //   return Ok(list);

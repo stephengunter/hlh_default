@@ -22,6 +22,33 @@ namespace ApplicationCore.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("ApplicationCore.Models.IT.Brand", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("Removed")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("IT.Brands");
+                });
+
             modelBuilder.Entity("ApplicationCore.Models.IT.Category", b =>
                 {
                     b.Property<int>("Id")
@@ -29,6 +56,9 @@ namespace ApplicationCore.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("Abstract")
+                        .HasColumnType("bit");
 
                     b.Property<string>("EntityType")
                         .IsRequired()
@@ -81,6 +111,113 @@ namespace ApplicationCore.Migrations
                     b.HasIndex("CategoryId");
 
                     b.ToTable("IT.CategoryEntity");
+                });
+
+            modelBuilder.Entity("ApplicationCore.Models.IT.Device", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Alias")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("BrandName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("CategoryId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("Fired")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("GetDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Ip")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Kind")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("LastUpdated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("LocationId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Money")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("No")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("OutDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("PropNum")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("PropertyId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Ps")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("Removed")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Room")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Spec")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("StatusText")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SupplierName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Title")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Trans")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Type")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Work_A")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Work_M")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("IT.Devices");
                 });
 
             modelBuilder.Entity("ApplicationCore.Models.IT.Item", b =>
@@ -282,7 +419,17 @@ namespace ApplicationCore.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Code")
+                    b.Property<string>("BrandName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("BuyDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("CategoryId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("CategoryName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -293,8 +440,27 @@ namespace ApplicationCore.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("Deprecated")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("DownDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("GetDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<DateTime?>("LastUpdated")
                         .HasColumnType("datetime2");
+
+                    b.Property<int?>("LocationId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("LocationName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("MinYears")
+                        .HasColumnType("int");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -307,6 +473,9 @@ namespace ApplicationCore.Migrations
                     b.Property<int>("Order")
                         .HasColumnType("int");
 
+                    b.Property<int>("PropertyType")
+                        .HasColumnType("int");
+
                     b.Property<string>("Ps")
                         .HasColumnType("nvarchar(max)");
 
@@ -317,7 +486,17 @@ namespace ApplicationCore.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("UpdatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserName")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
@@ -430,6 +609,36 @@ namespace ApplicationCore.Migrations
                     b.HasIndex("ParentId");
 
                     b.ToTable("Departments");
+                });
+
+            modelBuilder.Entity("ApplicationCore.Models.Identity.Location", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Ps")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("Removed")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Locations");
                 });
 
             modelBuilder.Entity("ApplicationCore.Models.Identity.Profiles", b =>

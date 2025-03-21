@@ -1,15 +1,20 @@
 ﻿using ApplicationCore.Models.IT;
 using Ardalis.Specification;
+using Infrastructure.Helpers;
 
 namespace ApplicationCore.Specifications.IT;
-public class ItemSpecification : Specification<Item>
+
+public abstract class BaseItemSpecification : Specification<Item>
 {
-   public ItemSpecification()
+   public BaseItemSpecification()
    {
       Query.Where(item => !item.Removed);
    }
 }
-public class ItembyCodeSpecification : Specification<Item>
+public class ItemSpecification : BaseItemSpecification
+{
+}
+public class ItembyCodeSpecification : BaseItemSpecification
 {
    public ItembyCodeSpecification(string code)
    {

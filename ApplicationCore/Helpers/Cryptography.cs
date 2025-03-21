@@ -1,7 +1,7 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
-namespace ApplicationCore.Helpers;
 
+namespace ApplicationCore.Helpers;
 public static class CryptographyHelper
 {
    public static byte[] DeriveKeyFromString(this string keyString)
