@@ -2,7 +2,7 @@
 using ApplicationCore.Models.Identity;
 using ApplicationCore.Specifications.Identity;
 
-namespace ApplicationCore.Services;
+namespace ApplicationCore.Services.Identity;
 
 public interface IAppUsersService
 {

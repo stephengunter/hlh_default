@@ -1,4 +1,5 @@
-﻿using Infrastructure.Entities;
+﻿using ApplicationCore.Helpers.IT;
+using Infrastructure.Entities;
 using Infrastructure.Helpers;
 using Infrastructure.Views;
 
@@ -6,6 +7,7 @@ namespace ApplicationCore.Views.IT;
 
 public class DeviceViewModel : EntityBaseView, IBaseRecordView
 {
+   public int? OldId { get; set; }
    public string? Title { get; set; } //script
    public string? No { get; set; }  //de_no
    public string? Kind { get; set; } //de_kind
@@ -49,4 +51,27 @@ public class DeviceViewModel : EntityBaseView, IBaseRecordView
    public string CreatedAtText => CreatedAt.ToDateTimeString();
    public string LastUpdatedText => LastUpdated.ToDateTimeString();
 
+   public string OutDateText => OutDate.ToDateTimeString();
+   public string GetDateText => GetDate.ToDateTimeString();
+
+   public string PropNumText => PropNum.ToPropertyNumberText();
+   public string PropNumStickText => PropNum.ToPropertyNumberStickText();
+
+}
+
+public class DeviceLabels
+{
+   public string Title => "名稱";
+   public string Name => "別名";
+   public string Category => "設備分類";
+   public string No => "設備編號"; 
+   public string Brand => "廠牌";
+   public string Type => "型號";
+   public string PropNum => "財產編號";
+   public string Location => "存置地點";
+   public string Room => "存置地點";
+   public string UserName => "保管人";
+   public string DownDate => "下架日期";
+   public string GetDate => "取得日期";
+   public string Ps => "備註";
 }

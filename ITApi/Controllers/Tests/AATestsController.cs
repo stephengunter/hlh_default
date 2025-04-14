@@ -45,32 +45,33 @@ public class AATestsController : BaseTestController
    [HttpGet]
    public async Task<ActionResult> Index()
    {
-      
-      await _propertyService.RefreshAsync();
-      //string filePath = @"C:\temp\20250321\資訊財產物品帳.xlsx";
-      //var src = PropertyExcelHelpers.GetPropertyListFromFile(filePath);
-      //await _propertyService.SyncAsync(src);
-      //var categories = _context.Categories.Where(x => x.EntityType == nameof(Device)).ToList();
-      //foreach (var prop in prop_list)
-      //{
-      //   var category = categories.FirstOrDefault(x => x.Title == prop.CategoryName);
-      //   if (category is null) continue;
-
-      //   prop.CategoryId = category.Id;
-      //}
-
-      //_context.SaveChanges();
-      //  bool hasDuplicates = _context.Properties.GroupBy(p => p.Number).Any(g => g.Count() > 1);
-      //  var duplicateNumbers = _context.Properties
-      //.GroupBy(p => p.Number)
-      //.Where(g => g.Count() > 1)
-      //.Select(g => g.Key)
-      //.ToList();
+      var list = await _propertyService.FetchAsync(true);
+      var batch = list.GetInBatches(4);
 
 
-
-      return Ok();
+      return Ok(batch);
    }
+   //int AddTitle(ExcelWorksheet worksheet, int rowIndex, string title)
+   //{
+   //   worksheet.Cells[rowIndex, 1].Value = title;
+   //   worksheet.Cells[rowIndex, 1, rowIndex, Keys.Count].Merge = true;
+   //   worksheet.Cells[rowIndex, 1].Style.Font.Size = 18;
+   //   worksheet.Cells[rowIndex, 1].Style.Font.Bold = true;
+   //   worksheet.Cells[rowIndex, 1].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+   //   worksheet.Cells[rowIndex, 1].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+
+   //   //Set row bgcolor
+   //   //codes goes here
+   //   // Set row background color
+   //   worksheet.Cells[rowIndex, 1, rowIndex, Keys.Count].Style.Fill.PatternType = ExcelFillStyle.Solid;
+   //   worksheet.Cells[rowIndex, 1, rowIndex, Keys.Count].Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.LightGray); // Use your desired color
+
+
+   //   worksheet.Row(rowIndex).Height = 30;
+
+   //   rowIndex += 1;
+   //   return rowIndex;
+   //}
 
    void test()
    {

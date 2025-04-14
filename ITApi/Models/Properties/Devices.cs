@@ -8,27 +8,21 @@ using Infrastructure.Views;
 
 namespace ITApi.Models;
 
-public class DeviceLabels
-{
-   public string Title => "名稱";
-   public string Category => "設備分類";
-   public string No => "代碼";
-   public string PropNum => "財產編號";
-   public string Room => "存置地點";
-   public string Ps => "備註";
-}
 public class DevicesAdminModel
 {
-   public DevicesAdminModel(DevicesFetchRequest request, CategoryViewModel rootCategory)
+   public DevicesAdminModel(DevicesFetchRequest request, CategoryViewModel rootCategory,
+      ICollection<CategoryViewModel> categories, ICollection<LocationViewModel> locations)
    {
       Request = request;
       RootCategory = rootCategory;
+      Categories = categories;
+      Locations = locations;
    }
    public DevicesFetchRequest Request { get; set; }
    public CategoryViewModel RootCategory { get; set; }
    public ICollection<CategoryViewModel> Categories { get; set; }
+   public ICollection<LocationViewModel> Locations { get; set; }
    public DeviceLabels Labels => new DeviceLabels();
-   //public DeviceTransactionLabels TransactionLabels => new DeviceTransactionLabels();
 }
 public class DevicesIndexModel
 {

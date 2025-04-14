@@ -1,16 +1,13 @@
 ﻿using Infrastructure.Helpers;
 using ApplicationCore.Models.IT;
 using ApplicationCore.Views.IT;
-using ApplicationCore.Models.Identity;
+using ApplicationCore.Consts.IT;
 using AutoMapper;
 using Infrastructure.Paging;
 using Infrastructure.Views;
 using OfficeOpenXml;
-using ApplicationCore.Migrations;
-using Infrastructure.Interfaces;
-using ApplicationCore.DataAccess;
-using Ardalis.Specification.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore;
+using ApplicationCore.Views;
+using OfficeOpenXml.Style;
 
 namespace ApplicationCore.Helpers.IT;
 public static class PropertyHelpers
@@ -24,11 +21,16 @@ public static class PropertyHelpers
    public static List<PropertyViewModel> MapViewModelList(this IEnumerable<Property> entitie, IMapper mapper)
       => entitie.Select(item => MapViewModel(item, mapper)).ToList();
 
-   public static PagedList<Property, PropertyViewModel> GetPagedList(this IEnumerable<Property> entitie, IMapper mapper, int page = 1, int pageSize = 999)
+   public static PagedList<Property, PropertyViewModel> GetPagedList(this IEnumerable<Property> entitie, IMapper mapper, int page = 1, int pageSize = 10)
    {
       var pageList = new PagedList<Property, PropertyViewModel>(entitie, page, pageSize);
       pageList.SetViewList(pageList.List.MapViewModelList(mapper));
 
+      return pageList;
+   }
+   public static PagedList<SourcePropertyModel> GetPagedList(this IEnumerable<SourcePropertyModel> entitie, int page = 1, int pageSize = 10)
+   {
+      var pageList = new PagedList<SourcePropertyModel>(entitie, page, pageSize);
       return pageList;
    }
 
@@ -46,16 +48,218 @@ public static class PropertyHelpers
       => new BaseOption<int>(entity.Id, entity.Name);
 
    public static IEnumerable<Property> GetOrdered(this IEnumerable<Property> entitie)
-     => entitie.OrderBy(item => item.Id);
+     => entitie.OrderBy(item => item.CategoryId).OrderBy(item => item.LocationId).OrderBy(item => item.Id);
+
+   public static List<PropertiesGroupView> GetPropertiesGroupViews(this IEnumerable<Property> properties)
+   {
+      var groupedCounts = properties.GroupBy(p => p.CategoryId)
+                         .Select(g => new
+                         {
+                            CategoryId = g.Key,
+                            Count = g.Count()
+                         })
+                        .ToList();
+      var list = groupedCounts.Select(x => new PropertiesGroupView
+      {
+         CategoryId = x.CategoryId.HasValue ? x.CategoryId.Value : null,
+         Count = x.Count
+      }).ToList();
+      return list;
+   }
+   public static string ToPropertyNumberText(this string? number)
+   {
+      if (string.IsNullOrEmpty(number)) return "";
+      if (number.Length == 18)
+      {
+         return $"{number[0]}-{number.Substring(1, 2)}-{number.Substring(3, 2)}-{number.Substring(5, 2)}-{number.Substring(7, 4)}-{number.Substring(11, 7)}";
+      }
+      return "";
+   }
+   public static string ToPropertyNumberStickText(this string? number)
+   {
+      if (string.IsNullOrEmpty(number)) return "";
+      if (number.Length == 18)
+      {
+         return $"{number.Substring(0, 7)}-{number.Substring(7, 4)}-{number.Substring(11, 7)}";
+      }
+      return number;
+   }
 }
 
 public class PropertyExcelHelpers
 {
-   public static List<SourcePropertyModel> GetPropertyListFromFile(string filePath)
+   public static MemoryStream CreateReportExcel(string title, List<PropertyViewModel> views, List<PropertiesGroupView> groupViews)
+   {
+      var reportColumns = GetReportColumns();
+      ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+      using (var package = new ExcelPackage())
+      {
+         var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+         int cols = reportColumns.Count;
+         int rowIndex = 1;
+         worksheet.Cells[rowIndex, 1].Value = title;
+         worksheet.Cells[rowIndex, 1, rowIndex, cols].Merge = true;
+         worksheet.Cells[rowIndex, 1].Style.Font.Size = 14;
+         worksheet.Cells[rowIndex, 1].Style.Font.Bold = true;
+         rowIndex += 1;
+
+         int height = 15;
+         for (int i = 0; i < cols; i++)
+         {
+            worksheet.Column(i + 1).Width = reportColumns[i].Width;
+            worksheet.Cells[rowIndex, i + 1].Value = reportColumns[i].Title;
+            worksheet.Row(rowIndex).Height = height;
+            worksheet.Cells[rowIndex, 1, rowIndex, cols].Style.Font.Size = 11;
+            worksheet.Cells[rowIndex, 1, rowIndex, cols].Style.Font.Bold = true;
+         }
+         rowIndex += 1;
+         foreach (var view in views)
+         {
+            worksheet.Cells[rowIndex, 1].Value = view.PropertyTypeText;
+            worksheet.Cells[rowIndex, 2].Value = view.CategoryName;
+            worksheet.Cells[rowIndex, 3].Value = view.TitleNameText;
+            worksheet.Cells[rowIndex, 4].Value = view.NumberStickText;
+            worksheet.Cells[rowIndex, 5].Value = view.BrandName;
+            worksheet.Cells[rowIndex, 6].Value = view.Type;
+            worksheet.Cells[rowIndex, 7].Value = view.UserName;
+            worksheet.Cells[rowIndex, 8].Value = view.LocationName;
+            worksheet.Cells[rowIndex, 9].Value = view.Ps;
+            worksheet.Row(rowIndex).Height = height;
+            rowIndex += 1;
+         }
+
+         rowIndex += 1;
+         var batches = groupViews.GetInBatches(4);
+         foreach (var groupViewsBatch in batches)
+         {
+            string text = "";
+            foreach (var groupView in groupViewsBatch)
+            {
+               text += $"   {groupView.CategoryName} : {groupView.Count}   ";
+            }
+            worksheet.Cells[rowIndex, 1].Value = text;
+            worksheet.Cells[rowIndex, 1, rowIndex, cols].Merge = true;
+            worksheet.Cells[rowIndex, 1].Style.Font.Size = 14;
+            worksheet.Cells[rowIndex, 1].Style.Font.Bold = true;
+            rowIndex += 1;
+         }
+
+         using (var range = worksheet.Cells[worksheet.Dimension.Address])
+         {
+            // Set borders
+            range.Style.Border.Top.Style = ExcelBorderStyle.Thin;
+            range.Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
+            range.Style.Border.Left.Style = ExcelBorderStyle.Thin;
+            range.Style.Border.Right.Style = ExcelBorderStyle.Thin;
+
+            // Set alignment (center text)
+            range.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+            range.Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+         }
+
+         // Step 3: Save the Excel package to a memory stream
+         var stream = new MemoryStream();
+         package.SaveAs(stream);
+         stream.Position = 0; 
+         return stream;
+      }
+   }
+   static List<ReportColumn> GetReportColumns()
+   {
+      var labels = new PropertyLabels();
+      int unit = 10;
+      var list = new List<ReportColumn>();
+      list.Add(new ReportColumn(nameof(labels.PropertyType), labels.PropertyType, unit));
+      list.Add(new ReportColumn(nameof(labels.Category), labels.Category, unit));
+      list.Add(new ReportColumn(nameof(labels.Title), labels.Title, unit * 2 + 5));
+      list.Add(new ReportColumn(nameof(labels.Number), labels.Number, unit * 2 + 5));
+      list.Add(new ReportColumn(nameof(labels.Brand), labels.Brand, unit + 5));
+      list.Add(new ReportColumn(nameof(labels.Type), labels.Type, unit * 2 + 5));
+      list.Add(new ReportColumn(nameof(labels.UserName), labels.UserName, unit));
+      list.Add(new ReportColumn(nameof(labels.Location), labels.Location, unit));
+      list.Add(new ReportColumn(nameof(labels.Ps), labels.Ps, unit * 2));
+      return list;
+   }
+   public static List<SourcePropertyModel> GetPropertyListFromFile(MemoryStream stream, PropertyType proptype)
    {
       ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
       var list = new List<SourcePropertyModel>();
-      using (var package = new ExcelPackage(new FileInfo(filePath)))
+      using (var package = new ExcelPackage(stream))
+      {
+         var worksheet = package.Workbook.Worksheets[0];
+         if (worksheet == null) throw new InvalidOperationException("No worksheet found in the Excel file.");
+         if (worksheet.Dimension == null) throw new InvalidOperationException("The worksheet is empty.");
+         int rowCount = worksheet.Dimension.Rows; // Total rows
+         int colCount = worksheet.Dimension.Columns; // Total columns
+         var columnMapping = new Dictionary<string, int>();
+         for (int col = 1; col <= colCount; col++)
+         {
+            string header = worksheet.Cells[1, col].Text.Trim();
+            if (!string.IsNullOrEmpty(header) && !columnMapping.ContainsKey(header))
+            {
+               columnMapping[header] = col; // Store column index by name
+            }
+         }
+         int numCol = columnMapping["財產編號"];
+         int categoryNameCol = columnMapping["財產名稱"];
+         int nameCol = columnMapping["財產別名"];
+         int minyearCol = columnMapping["最低使用年限"];
+         int buyDateCol = columnMapping["購置日期"];
+         int getDateCol = columnMapping["取得日期"];
+         int typeCol = columnMapping["型式"];
+         int brandCol = columnMapping["廠牌"];
+         int usernameCol = columnMapping["保管人(名稱)"];
+
+         int locationCodeCol = columnMapping["存置地點(代碼)"];
+         int locationNameCol = columnMapping["存置地點(名稱)"];
+         int deprecatedCol = columnMapping["是否減損"];
+
+         for (int row = 2; row <= rowCount; row++)
+         {
+            string num = worksheet.Cells[row, numCol].Text.Trim(); //3101001-0007-0000001
+            string categoryName = worksheet.Cells[row, categoryNameCol].Text.Trim(); //不斷電裝置
+            string name = worksheet.Cells[row, nameCol].Text.Trim(); //財產別名
+            string minyear = worksheet.Cells[row, minyearCol].Text.Trim(); //最低使用年限
+            string buyDate = worksheet.Cells[row, buyDateCol].Text.Trim(); //購置日期
+            string getDate = worksheet.Cells[row, getDateCol].Text.Trim(); //取得日期
+            string type = worksheet.Cells[row, typeCol].Text.Trim(); //型式
+            string brand = worksheet.Cells[row, brandCol].Text.Trim(); //廠牌
+            //string userCode = worksheet.Cells[row, userCodeCol].Text.Trim(); //保管人(代碼)
+            string username = worksheet.Cells[row, usernameCol].Text.Trim(); //保管人(名稱)
+            string locationCode = worksheet.Cells[row, locationCodeCol].Text.Trim(); //存置地點(代碼)
+            string locationName = worksheet.Cells[row, locationNameCol].Text.Trim(); //存置地點(名稱)
+           
+            string deprecated = worksheet.Cells[row, deprecatedCol].Text.Trim(); //是否減損
+
+            var item = new SourcePropertyModel()
+            {
+               PropertyType = proptype,
+               Number = num.ToPropNumber(),
+               CategoryName = categoryName,
+               Name = name,
+               MinYears = minyear.Replace("年", "").Trim().ToInt(),
+               BuyDate = buyDate.Replace("/", "").Trim().ToInt().RocToDatetime(),
+               GetDate = buyDate.Replace("/", "").Trim().ToInt().RocToDatetime(),
+               Type = type,
+               BrandName = brand,
+               UserName = username.Split('（')[0],
+               LocationCode = locationCode,
+               LocationName = locationName,
+               
+               Deprecated = deprecated == "是"
+            };
+            list.Add(item);
+         }
+      }
+      return list;
+   }
+
+   public static List<SourcePropertyModel> GetPropertyListFromITFile(MemoryStream stream)
+   {
+      //資訊設備輸出Excel
+      ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+      var list = new List<SourcePropertyModel>();
+      using (var package = new ExcelPackage(stream))
       {
          var worksheet = package.Workbook.Worksheets[0];
          if (worksheet == null) throw new InvalidOperationException("No worksheet found in the Excel file.");

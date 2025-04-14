@@ -9,3 +9,10 @@ public enum FileTypes
    Excel
 
 }
+
+
+
+public class FileContentType
+{
+   public static string Excel = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+}

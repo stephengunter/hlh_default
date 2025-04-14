@@ -13,6 +13,7 @@ namespace ApplicationCore.Services.IT;
 
 public interface IPropertyService
 {
+   Task<IEnumerable<Property>> FetchAllAsync();
    Task<IEnumerable<Property>> FetchAsync(bool deprecated, ICollection<string>? includes = null);
    Task<Property?> FetchByNumberAsync(string num);
    Task<Property?> FindByNumberAsync(string num, bool deprecated, PropertyType type);
@@ -40,6 +41,8 @@ public class PropertyService : IPropertyService
       _locationRepository = locationRepository;
 
    }
+   public async Task<IEnumerable<Property>> FetchAllAsync()
+       => await _repository.ListAsync();
    public async Task<IEnumerable<Property>> FetchAsync(bool fired, ICollection<string>? includes = null)
        => await _repository.ListAsync(new PropertySpecification(fired, includes));
    public async Task<Property?> FetchByNumberAsync(string num)
@@ -106,6 +109,9 @@ public class PropertyService : IPropertyService
       var updateList = new List<Property>();
       foreach (var entity in list)
       {
+         if (entity.DownDate.HasValue) entity.Order = -1;
+         else entity.Order = 0;
+
          var locations = await _locationRepository.ListAsync(new LocationsSpecification());
          SetLocationId(entity, locations.ToList());
 

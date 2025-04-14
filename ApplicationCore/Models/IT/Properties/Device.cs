@@ -7,6 +7,7 @@ namespace ApplicationCore.Models.IT;
 [Table("IT.Devices")]
 public class Device : EntityBase, IBaseRecord, IRemovable, ISortable
 {
+   public int? OldId { get; set; } //no1
    public string? Title { get; set; } //script
    public string? No { get; set; }  //de_no
    public string? Kind { get; set; } //de_kind

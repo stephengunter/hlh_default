@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
 using Infrastructure.Helpers;
-using ApplicationCore.Authorization;
 using ApplicationCore.Models.IT;
 using Ardalis.Specification;
 using AutoMapper;
@@ -10,24 +9,33 @@ using ApplicationCore.Helpers.IT;
 using ApplicationCore.Services.IT;
 using ITApi.Models;
 using ApplicationCore.Services.Identity;
-using ApplicationCore.DataAccess;
-using ApplicationCore.Models.Identity;
-using ApplicationCore.Views.Identity;
 using Infrastructure.Paging;
-using System.Drawing.Printing;
 using ApplicationCore.Views.IT;
+using ApplicationCore.Settings;
+using Microsoft.Extensions.Options;
+using ApplicationCore.Models.Identity;
 
 namespace ITApi.Controllers.Admin;
 
 public class DevicesController : BaseAdminController
 {
+   private readonly HLHDBSettings _HLHDBSettings;
    private readonly IDeviceService _deviceService;
+   private readonly IPropertyService _propertiesService;
    private readonly ICategoryService _categoryService;
+   private readonly ILocationService _locationService;
+   private readonly IProfilesService _profilesService;
    private readonly IMapper _mapper;
-   public DevicesController(IDeviceService deviceService, ICategoryService categoryService, IMapper mapper)
+   public DevicesController(IOptions<HLHDBSettings> HLHDBSettings, 
+      IDeviceService deviceService, IPropertyService propertiesService, ICategoryService categoryService,
+      ILocationService locationService, IProfilesService profilesService, IMapper mapper)
    {
+      _HLHDBSettings = HLHDBSettings.Value;
       _deviceService = deviceService;
+      _propertiesService = propertiesService;
       _categoryService = categoryService;
+      _locationService = locationService;
+      _profilesService = profilesService;
       _mapper = mapper;
    }
    DeviceLabels Labels => new DeviceLabels();
@@ -40,6 +48,8 @@ public class DevicesController : BaseAdminController
    [HttpGet("init")]
    public async Task<ActionResult<DevicesAdminModel>> Init()
    {
+      var locations = await _locationService.FetchAsync();
+
       var categories = await _categoryService.FetchAsync(nameof(Device));
       categories = categories.GetOrdered();
       var categoryIds = categories.Select(c => c.Id).ToList();
@@ -49,25 +59,19 @@ public class DevicesController : BaseAdminController
       
       bool fired = false;
       int? category = null;
-      var model = new DevicesAdminModel(new DevicesFetchRequest(fired, category), root.MapViewModel(_mapper));
+      var request = new DevicesFetchRequest(fired, category);
+      var model = new DevicesAdminModel(request, root.MapViewModel(_mapper), 
+         categories.MapViewModelList(_mapper), locations.MapViewModelList(_mapper));
 
       model.Categories = categories.MapViewModelList(_mapper);
 
       return model;
    }
 
-   [HttpGet]
-   public async Task<ActionResult<PagedList<Device, DeviceViewModel>>> Index(bool fired, int? category, int page = 1, int pageSize = 10)
+   async Task<IEnumerable<Device>> FetchAsync(bool fired, Category? selectedCategory, Location? selectedLocation)
    {
       var includes = new List<string>();
       IEnumerable<Device> devices;
-      
-      Category selectedCategory = null;
-      if (category.HasValue)
-      {
-         selectedCategory = await ValidateCategoryAsync(category.Value, subItems: true);
-         if (!ModelState.IsValid) return BadRequest(ModelState);
-      }
       if (selectedCategory is null)
       {
          devices = await _deviceService.FetchNoneCategoryEntitiesAsync(fired, includes);
@@ -75,12 +79,55 @@ public class DevicesController : BaseAdminController
       else
       {
          var categories = new List<Category>() { selectedCategory };
-         if(selectedCategory.SubItems!.HasItems()) categories.AddRange(selectedCategory.GetAllSubItems());
+         if (selectedCategory.SubItems!.HasItems()) categories.AddRange(selectedCategory.GetAllSubItems());
 
          devices = await _deviceService.FetchAsync(fired, categories, includes);
       }
-     
-      var model = new PagedList<Device, DeviceViewModel>(devices, page, pageSize);
+
+      if (selectedLocation != null) devices = devices.Where(x => x.LocationId == selectedLocation!.Id);
+      devices = devices.GetOrdered();
+
+      return devices;
+   }
+
+   [HttpGet]
+   public async Task<ActionResult<PagedList<Device, DeviceViewModel>>> Index(bool fired, int? category, int? location, int page = 1, int pageSize = 10)
+   {
+      Category selectedCategory = null;
+      if (category.HasValue)
+      {
+         selectedCategory = await ValidateCategoryAsync(category.Value, subItems: true);
+         if (!ModelState.IsValid) return BadRequest(ModelState);
+      }
+      Location? selectedLocation = null;
+      if (location.HasValue)
+      {
+         selectedLocation = await _locationService.GetByIdAsync(location.Value);
+         if (selectedLocation is null)
+         {
+            ModelState.AddModelError(nameof(Location), ValidationMessages.NotExist(Labels.Location));
+            return BadRequest(ModelState);
+         }
+      }
+
+      var devices = await FetchAsync(fired, selectedCategory, selectedLocation);
+
+
+      //if (selectedCategory is null)
+      //{
+      //   devices = await _deviceService.FetchNoneCategoryEntitiesAsync(fired, includes);
+      //}
+      //else
+      //{
+      //   var categories = new List<Category>() { selectedCategory };
+      //   if(selectedCategory.SubItems!.HasItems()) categories.AddRange(selectedCategory.GetAllSubItems());
+
+      //   devices = await _deviceService.FetchAsync(fired, categories, includes);
+      //}
+
+
+
+      var model = new PagedList<Device, DeviceViewModel>(devices!, page, pageSize);
 
       model.SetViewList(model.List.MapViewModelList(_mapper));
       return model;
@@ -114,6 +161,16 @@ public class DevicesController : BaseAdminController
       //model.LastClosed = lastClosed!.MapViewModel(_mapper);
       //return model;
    }
+
+   [HttpPost("imports")]
+   public async Task<ActionResult> Imports()
+   {
+      var sourceList = DeviceOldDbHelpers.GetListFromOldDb(_HLHDBSettings.ConnectionString);
+      //await _deviceService.SyncAsync(sourceList);
+      await _deviceService.RefreshAsync();
+      return NoContent();
+   }
+
    //[HttpGet("create")]
    //public ActionResult<DeviceAddForm> Create()
    //   => new DeviceAddForm();

@@ -7,8 +7,24 @@
       "RelativeMoniker": "D:0:0:{03016527-AACF-4391-9744-59392859C623}|ITApi\\ITApi.csproj|solutionrelative:itapi\\controllers\\admin\\properties\\propertiescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
+      "AbsoluteMoniker": "D:0:0:{2A48B911-91BB-48FE-80DA-E4C5D08D803E}|ApplicationCore\\ApplicationCore.csproj|c:\\users\\administrator\\source\\repos\\csharp\\hlh_default\\applicationcore\\services\\it\\categories.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2A48B911-91BB-48FE-80DA-E4C5D08D803E}|ApplicationCore\\ApplicationCore.csproj|solutionrelative:applicationcore\\services\\it\\categories.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2A48B911-91BB-48FE-80DA-E4C5D08D803E}|ApplicationCore\\ApplicationCore.csproj|c:\\users\\administrator\\source\\repos\\csharp\\hlh_default\\applicationcore\\views\\it\\properties\\property.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2A48B911-91BB-48FE-80DA-E4C5D08D803E}|ApplicationCore\\ApplicationCore.csproj|solutionrelative:applicationcore\\views\\it\\properties\\property.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{03016527-AACF-4391-9744-59392859C623}|ITApi\\ITApi.csproj|c:\\users\\administrator\\source\\repos\\csharp\\hlh_default\\itapi\\models\\properties\\properties.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{03016527-AACF-4391-9744-59392859C623}|ITApi\\ITApi.csproj|solutionrelative:itapi\\models\\properties\\properties.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2A48B911-91BB-48FE-80DA-E4C5D08D803E}|ApplicationCore\\ApplicationCore.csproj|c:\\users\\administrator\\source\\repos\\csharp\\hlh_default\\applicationcore\\models\\it\\properties\\property.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2A48B911-91BB-48FE-80DA-E4C5D08D803E}|ApplicationCore\\ApplicationCore.csproj|solutionrelative:applicationcore\\models\\it\\properties\\property.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{9EE79ACA-858C-491B-B86D-E332781F162B}|Infrastructure\\Infrastructure.csproj|c:\\users\\administrator\\source\\repos\\csharp\\hlh_default\\infrastructure\\paging\\pagedlist.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{9EE79ACA-858C-491B-B86D-E332781F162B}|Infrastructure\\Infrastructure.csproj|solutionrelative:infrastructure\\paging\\pagedlist.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -17,9 +33,22 @@
       "VerticalTabListWidth": 256,
       "DocumentGroups": [
         {
-          "DockedWidth": 172,
-          "SelectedChildIndex": 0,
+          "DockedWidth": 262,
+          "SelectedChildIndex": 1,
           "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Properties.cs",
+              "DocumentMoniker": "C:\\Users\\Administrator\\source\\repos\\csharp\\hlh_default\\ITApi\\Models\\Properties\\Properties.cs",
+              "RelativeDocumentMoniker": "ITApi\\Models\\Properties\\Properties.cs",
+              "ToolTip": "C:\\Users\\Administrator\\source\\repos\\csharp\\hlh_default\\ITApi\\Models\\Properties\\Properties.cs",
+              "RelativeToolTip": "ITApi\\Models\\Properties\\Properties.cs",
+              "ViewState": "AgIAAD4AAAAAAAAAAAAAwEgAAAANAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-04-14T07:13:02.671Z",
+              "EditorCaption": ""
+            },
             {
               "$type": "Document",
               "DocumentIndex": 0,
@@ -28,22 +57,67 @@
               "RelativeDocumentMoniker": "ITApi\\Controllers\\Admin\\Properties\\PropertiesController.cs",
               "ToolTip": "C:\\Users\\Administrator\\source\\repos\\csharp\\hlh_default\\ITApi\\Controllers\\Admin\\Properties\\PropertiesController.cs",
               "RelativeToolTip": "ITApi\\Controllers\\Admin\\Properties\\PropertiesController.cs",
-              "ViewState": "AgIAABwAAAAAAAAAAIAwwDcAAAATAAAAAAAAAA==",
+              "ViewState": "AgIAAIgAAAAAAAAAAAAIwKEAAAA0AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-21T08:58:42.326Z",
+              "WhenOpened": "2025-04-14T06:30:59.571Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "Properties.cs",
-              "DocumentMoniker": "C:\\Users\\Administrator\\source\\repos\\csharp\\hlh_default\\ITApi\\Models\\Properties\\Properties.cs",
-              "RelativeDocumentMoniker": "ITApi\\Models\\Properties\\Properties.cs",
-              "ToolTip": "C:\\Users\\Administrator\\source\\repos\\csharp\\hlh_default\\ITApi\\Models\\Properties\\Properties.cs",
-              "RelativeToolTip": "ITApi\\Models\\Properties\\Properties.cs",
-              "ViewState": "AgIAABUAAAAAAAAAAAAmwCQAAAABAAAAAAAAAA==",
+              "DocumentIndex": 2,
+              "Title": "Property.cs",
+              "DocumentMoniker": "C:\\Users\\Administrator\\source\\repos\\csharp\\hlh_default\\ApplicationCore\\Views\\IT\\Properties\\Property.cs",
+              "RelativeDocumentMoniker": "ApplicationCore\\Views\\IT\\Properties\\Property.cs",
+              "ToolTip": "C:\\Users\\Administrator\\source\\repos\\csharp\\hlh_default\\ApplicationCore\\Views\\IT\\Properties\\Property.cs",
+              "RelativeToolTip": "ApplicationCore\\Views\\IT\\Properties\\Property.cs",
+              "ViewState": "AgIAAFQAAAAAAAAAAADwv1oAAAAWAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-21T08:58:11.854Z",
+              "WhenOpened": "2025-04-14T03:43:21.418Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "Property.cs",
+              "DocumentMoniker": "C:\\Users\\Administrator\\source\\repos\\csharp\\hlh_default\\ApplicationCore\\Models\\IT\\Properties\\Property.cs",
+              "RelativeDocumentMoniker": "ApplicationCore\\Models\\IT\\Properties\\Property.cs",
+              "ToolTip": "C:\\Users\\Administrator\\source\\repos\\csharp\\hlh_default\\ApplicationCore\\Models\\IT\\Properties\\Property.cs",
+              "RelativeToolTip": "ApplicationCore\\Models\\IT\\Properties\\Property.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-04-14T03:43:13.421Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "PagedList.cs",
+              "DocumentMoniker": "C:\\Users\\Administrator\\source\\repos\\csharp\\hlh_default\\Infrastructure\\Paging\\PagedList.cs",
+              "RelativeDocumentMoniker": "Infrastructure\\Paging\\PagedList.cs",
+              "ToolTip": "C:\\Users\\Administrator\\source\\repos\\csharp\\hlh_default\\Infrastructure\\Paging\\PagedList.cs",
+              "RelativeToolTip": "Infrastructure\\Paging\\PagedList.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABIAAAAhAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-04-14T03:11:44.44Z",
+              "EditorCaption": ""
+            }
+          ]
+        },
+        {
+          "DockedWidth": 103,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Categories.cs",
+              "DocumentMoniker": "C:\\Users\\Administrator\\source\\repos\\csharp\\hlh_default\\ApplicationCore\\Services\\IT\\Categories.cs",
+              "RelativeDocumentMoniker": "ApplicationCore\\Services\\IT\\Categories.cs",
+              "ToolTip": "C:\\Users\\Administrator\\source\\repos\\csharp\\hlh_default\\ApplicationCore\\Services\\IT\\Categories.cs",
+              "RelativeToolTip": "ApplicationCore\\Services\\IT\\Categories.cs",
+              "ViewState": "AgIAACAAAAAAAAAAAAAswC0AAAAiAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-04-14T07:48:58.638Z",
               "EditorCaption": ""
             }
           ]

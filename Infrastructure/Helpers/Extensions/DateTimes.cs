@@ -193,7 +193,14 @@ public static class DateTimeHelpers
    public static int ToDateNumber(this DateTime input) => Convert.ToInt32(GetDateString(input.Date));
 	public static int ToTimeNumber(this DateTime input) => Convert.ToInt32(GetTimeString(input));
 	public static string ToDateString(this DateTime input) => input.ToString("yyyy-MM-dd");
-	public static string ToDateString(this DateTime? input) => input.HasValue ? input.Value.ToDateString() : string.Empty;
+	public static string ToRocDateString(this DateTime input, bool cn = true)
+	{
+		int year = input.Year - 1911;
+		if (cn) return $"{year}年{input.Month}月{input.Day}日";
+		return $"{year}-{input.Month}-{input.Day}";
+
+   }
+   public static string ToDateString(this DateTime? input) => input.HasValue ? input.Value.ToDateString() : string.Empty;
 	public static string ToDateTimeString(this DateTime input) => input.ToString("yyyy-MM-dd H:mm:ss");
 	public static string ToDateTimeString(this DateTime? input) => input.HasValue ? input.Value.ToDateTimeString() : string.Empty;
 

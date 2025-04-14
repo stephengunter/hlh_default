@@ -9,6 +9,8 @@ using Infrastructure.Helpers;
 using OpenIddict.Validation.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using ApplicationCore.Web.Requests;
+using Microsoft.AspNetCore.Http;
+using System.Linq;
 
 namespace ApplicationCore.Web.Controllers;
 
@@ -47,7 +49,37 @@ public abstract class BaseController : ControllerBase
 
       return body.Replace("APPNAME", appSettings.Title).Replace("APPURL", appSettings.ClientUrl);
    }
+   protected  Dictionary<string, string> ValidateExcelFile(IFormFile file)
+   {
+      var errors = new Dictionary<string, string>();
+      if (file == null)
+      {
+         errors.Add("file", "必須上傳檔案");
+         return errors;
+      }
+      else
+      {
+         // Check file extension (for Excel files)
+         var allowedExtensions = new[] { ".xlsx", ".xls" };
+         var extension = Path.GetExtension(file.FileName).ToLower();
 
+         if (!allowedExtensions.Contains(extension))
+         {
+            errors.Add("file", "只接受 Excel 檔案 (.xlsx, .xls)");
+            return errors;
+         }
+
+         // Check MIME type for Excel
+         if (file.ContentType != "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" &&
+             file.ContentType != "application/vnd.ms-excel")
+         {
+            errors.Add("file", "檔案類型必須是 Excel (.xlsx, .xls)");
+            return errors;
+         }
+
+         return errors;
+      }
+   }
    protected void AddErrors(Dictionary<string, string> errors)
    {
       if (errors.Count > 0)

@@ -52,4 +52,26 @@ public static class IEnumerableHelpers
 
    public static IEnumerable<T> GetList<T>(this IEnumerable<T>? enumerable)
 		=> enumerable.IsNullOrEmpty() ? new List<T>() : enumerable!.ToList();
+
+   public static IEnumerable<List<T>> GetInBatches<T>(this IEnumerable<T> source, int batchSize)
+   {
+      if (source == null) throw new ArgumentNullException(nameof(source));
+      if (batchSize <= 0) throw new ArgumentException("Batch size must be greater than zero.", nameof(batchSize));
+
+      List<T> batch = new List<T>(batchSize);
+      foreach (var item in source)
+      {
+         batch.Add(item);
+         if (batch.Count == batchSize)
+         {
+            yield return batch;
+            batch = new List<T>(batchSize); // Start a new batch
+         }
+      }
+
+      // Return the last batch if it contains any items
+      if (batch.Count > 0)
+         yield return batch;
+   }
+
 }

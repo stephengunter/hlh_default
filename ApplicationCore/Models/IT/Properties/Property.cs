@@ -11,6 +11,7 @@ public class Property : EntityBase, IBaseRecord, IRemovable, ISortable
    public PropertyType PropertyType { get; set; }
    public string LocationName { get; set; } = String.Empty;
    public string CategoryName { get; set; } = String.Empty;
+   public string DeviceCode { get; set; } = String.Empty;
    public string BrandName { get; set; } = String.Empty;
    public string Name { get; set; } = String.Empty;
    public string Title { get; set; } = String.Empty;
@@ -20,6 +21,7 @@ public class Property : EntityBase, IBaseRecord, IRemovable, ISortable
    public string? UserId { get; set; }
 
    public int? LocationId { get; set; }
+   public int? DeviceId { get; set; }
    public DateTime? BuyDate { get; set; }
    public DateTime? GetDate { get; set; }
    public DateTime? DownDate { get; set; }
@@ -39,7 +41,8 @@ public class Property : EntityBase, IBaseRecord, IRemovable, ISortable
 }
 
 public enum PropertyType
-{ 
+{
+   UnKnown = -1,   //物品
    Item = 0,   //物品
    Property = 1, //財產
 }

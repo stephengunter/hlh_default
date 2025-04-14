@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
 using Infrastructure.Helpers;
-using ApplicationCore.Authorization;
 using ApplicationCore.Models.IT;
 using Ardalis.Specification;
 using AutoMapper;
@@ -10,12 +9,10 @@ using ApplicationCore.Helpers.IT;
 using ApplicationCore.Services.IT;
 using ITApi.Models;
 using ApplicationCore.Services.Identity;
-using ApplicationCore.DataAccess;
 using ApplicationCore.Models.Identity;
-using ApplicationCore.Views.Identity;
-using Infrastructure.Paging;
-using System.Drawing.Printing;
+using Infrastructure.Consts;
 using ApplicationCore.Views.IT;
+using Infrastructure.Paging;
 
 namespace ITApi.Controllers.Admin;
 
@@ -49,70 +46,197 @@ public class PropertiesController : BaseAdminController
       var locations = await _locationService.FetchAsync();
 
       bool deprecated = false;
-      int? category = null;
-      var model = new PropertiesAdminModel(new PropertiesFetchRequest(deprecated, category), categories.MapViewModelList(_mapper),
-         locations.MapViewModelList(_mapper));
+      int down = 0;
+      int type = -1;
+      int category = 0;
+      int? location = null;
+      int page = 1;
+      int pageSize = 10;
+      var request = new PropertiesFetchRequest(deprecated, down, type, category, location, page, pageSize);
+      var model = new PropertiesAdminModel(request, categories.MapViewModelList(_mapper), locations.MapViewModelList(_mapper));
 
       return model;
+   }
+
+   async Task<IEnumerable<Property>?> FetchAsync(bool deprecated, int down, int type)//, Category? selectedCategory, Location? selectedLocation)
+   {
+      var includes = new List<string>();
+      var properties = await _propertiesService.FetchAsync(deprecated, includes);
+
+      if(down < 0) properties = properties.Where(x => !x.Active);
+      else if (down > 0) properties = properties.Where(x => x.Active);
+
+      if (type == 0) properties = properties.Where(x => x.PropertyType == PropertyType.Item);
+      else if (type == 1) properties = properties.Where(x => x.PropertyType == PropertyType.Property);
+
+      //if (selectedCategory != null) properties = properties.Where(x => x.CategoryId == selectedCategory!.Id);
+      //if (selectedLocation != null) properties = properties.Where(x => x.LocationId == selectedLocation!.Id);
+      //properties = properties.GetOrdered();
+
+      return properties;
    }
 
    [HttpGet]
-   public async Task<ActionResult<PagedList<Property, PropertyViewModel>>> Index(bool deprecated, int? category, int page = 1, int pageSize = 10)
+   public async Task<ActionResult<PropertiesIndexModel>> Index(bool deprecated, int down, int type, int category, int? location, int page = 1, int pageSize = 10)
    {
-      var includes = new List<string>();
-      
       Category? selectedCategory = null;
-      if (category.HasValue)
+      if (category > 0)
       {
-         selectedCategory = await ValidateCategoryAsync(category.Value);
-         if (!ModelState.IsValid) return BadRequest(ModelState);
+         selectedCategory = await _categoryService.GetByIdAsync(category);
+         if (selectedCategory is null)
+         {
+            ModelState.AddModelError(nameof(Category), ValidationMessages.NotExist(Labels.Category));
+            return BadRequest(ModelState);
+         }
       }
 
-      var properties = await _propertiesService.FetchAsync(deprecated, includes);
-      if (selectedCategory != null) properties = properties.Where(x => x.CategoryId == category!.Value);
-         
+      Location? selectedLocation = null;
+      if (location.HasValue)
+      {
+         selectedLocation = await _locationService.GetByIdAsync(location.Value);
+         if (selectedLocation is null)
+         {
+            ModelState.AddModelError(nameof(Location), ValidationMessages.NotExist(Labels.Location));
+            return BadRequest(ModelState);
+         }
+      }
 
-      var model = new PagedList<Property, PropertyViewModel>(properties, page, pageSize);
+      var properties = await FetchAsync(deprecated, down, type);
+      if (selectedCategory != null) properties = properties!.Where(x => x.CategoryId == selectedCategory!.Id);
+      else if (category < 0) properties = properties!.Where(x => !x.CategoryId.HasValue);
 
-      model.SetViewList(model.List.MapViewModelList(_mapper));
-      return model;
-      //if (!active) return new PropertysIndexModel(devices.MapViewModelList(_mapper));
+      if (selectedLocation != null) properties = properties!.Where(x => x.LocationId == selectedLocation!.Id);
 
-      //var lastClosed = await _deviceReportService.GetLastClosedAsync();
-      //var sheets = await _deviceBalanceSheetService.FetchAsync(lastClosed!);
+      properties = properties!.GetOrdered();
 
-      //var date = lastClosed!.GetDate();
-      //var transactions = await _transactionService.FetchAsync(date!.Value.AddDays(1));
-      //var year_transactions = await _transactionService.FetchAsync(DateTime.Today.AddYears(-1));
-      //foreach (var device in devices)
-      //{
-      //   int lastStock = 0;
-      //   var sh = sheets.FirstOrDefault(x => x.PropertyId == device.Id);
-      //   if (sh != null) lastStock = sh.Stock;
+      var groupViews = new List<PropertiesGroupView>();
+      if (category == 0 && properties!.HasItems())
+      {
+         groupViews = properties!.GetPropertiesGroupViews();
+      }
 
-      //   var trans = transactions.Where(x => x.PropertyId == device.Id);
-      //   if (trans.IsNullOrEmpty()) device.Stock = lastStock;
-      //   else device.Stock = lastStock + trans.Sum(x => x.Quantity);
-
-      //   var deviceYearTransactions = year_transactions.Where(x => x.PropertyId == device.Id && x.Quantity > 0);
-      //   if (deviceYearTransactions.IsNullOrEmpty()) device.SaveStock = 0;
-      //   else device.SaveStock = deviceYearTransactions.Sum(x => x.Quantity);
-
-      //}
-
-      //devices = devices.OrderByDescending(x => x.SaveStock);
-
-      //var model = new PropertysIndexModel(devices.MapViewModelList(_mapper));
-      //model.LastClosed = lastClosed!.MapViewModel(_mapper);
-      //return model;
+      var pageList = properties!.GetPagedList(_mapper, page, pageSize);
+      return new PropertiesIndexModel(pageList, groupViews);
    }
-   async Task<Category?> ValidateCategoryAsync(int categoryId)
+   [HttpPost("upload")]
+   public async Task<ActionResult<PagedList<SourcePropertyModel>>> Upload([FromForm] PropertiesUploadRequest request)
    {
-      var category = await _categoryService.GetByIdAsync(categoryId);
-      if (category is null)
+      var propType = (PropertyType)request.PropertyType;
+      if (propType == PropertyType.UnKnown)
       {
-         ModelState.AddModelError(nameof(Category), ValidationMessages.NotExist(Labels.Category));
+         ModelState.AddModelError(nameof(PropertyType), ValidationMessages.NotExist(Labels.Type));
+         return BadRequest(ModelState);
       }
+      var file = request.File;
+      var errors = ValidateExcelFile(file!);
+      AddErrors(errors);
+      if (!ModelState.IsValid) return BadRequest(ModelState);
+
+      var sourceList = new List<SourcePropertyModel>();
+      using (var stream = new MemoryStream())
+      {
+         await file!.CopyToAsync(stream);
+         sourceList = PropertyExcelHelpers.GetPropertyListFromFile(stream, propType);
+      }
+      sourceList = sourceList.OrderBy(item => item.CategoryName).ToList();
+      return sourceList.GetPagedList();
+   }
+
+   async Task AddPropertyCategoriesAsync(IEnumerable<string> categoryNames)
+   {
+      var categories = await _categoryService.FetchAsync(nameof(Property));
+      var existCategoryNames = categories.Select(x => x.Title);
+      var newCategoryNames = categoryNames.Where(x => !existCategoryNames.Contains(x));
+      if (newCategoryNames.HasItems())
+      {
+         var newCategories = newCategoryNames.Select(name => new Category { Title = name, EntityType = nameof(Property) });
+         await _categoryService.AddRangeAsync(newCategories.ToList());
+      }
+   }
+
+   [HttpPost("imports")]
+   public async Task<ActionResult> Imports([FromBody] PropertiesImportRequest request)
+   {
+      var sourceList = request.List;
+      var categoryNames = sourceList.Select(item => item.CategoryName).Distinct();
+      await AddPropertyCategoriesAsync(categoryNames);
+      await _propertiesService.SyncAsync(sourceList);
+      await _propertiesService.RefreshAsync();
+      return NoContent();
+   }
+
+   [HttpPost("reports")]
+   public async Task<IActionResult> Reports(PropertiesFetchRequest request)
+   {
+      bool deprecated = false;
+      int down = 0;
+      int type = -1;
+      if (!request.Location.HasValue)
+      {
+         ModelState.AddModelError(nameof(Location), ValidationMessages.Required(Labels.Location));
+         return BadRequest(ModelState);
+      }
+
+      Location? selectedLocation = null;
+      selectedLocation = await _locationService.GetByIdAsync(request.Location!.Value);
+      if (selectedLocation is null)
+      {
+         ModelState.AddModelError(nameof(Location), ValidationMessages.NotExist(Labels.Location));
+         return BadRequest(ModelState);
+      }
+
+      var properties = await FetchAsync(deprecated, down, type);
+      properties = properties!.Where(x => x.LocationId == selectedLocation!.Id);
+
+      if (properties.IsNullOrEmpty())
+      {
+         ModelState.AddModelError("", "查無財產可輸出.");
+         return BadRequest(ModelState);
+      }
+
+      properties = properties!.GetOrdered();
+
+      var groupViews = properties!.GetPropertiesGroupViews();
+      var views = properties!.MapViewModelList(_mapper);
+      var categories = await _categoryService.FetchAsync(nameof(Property));
+      var locations = await _locationService.FetchAsync();
+      foreach (var view in views) 
+      {
+         var category = categories.FirstOrDefault(x => x.Id == view.CategoryId);
+         if (category != null) view.CategoryName = category.Title;
+
+         var location = locations.FirstOrDefault(x => x.Id == view.LocationId);
+         if (location != null) view.LocationName = location.Title;
+      }
+      foreach (var groupView in groupViews)
+      {
+         var category = categories.FirstOrDefault(x => x.Id == groupView.CategoryId);
+         if (category != null) groupView.CategoryName = category.Title;
+      }
+      string title = $"存置地點 : {selectedLocation.Title}          製表日期 : {DateTime.Today.ToRocDateString()}";
+      var stream = PropertyExcelHelpers.CreateReportExcel(title, views, groupViews);
+
+      string excelFileName = "properties.xlsx";
+      string contentType = FileContentType.Excel;
+      return File(stream, contentType, excelFileName);
+   }
+   
+   
+   async Task<Category?> ValidateCategoryAsync(int? categoryId)
+   {
+      Category? category  = null;
+      if (categoryId.HasValue) category = await _categoryService.GetByIdAsync(categoryId.Value);
+      
+      if (category is null) ModelState.AddModelError(nameof(Category), ValidationMessages.NotExist(Labels.Category));
       return category!;
    }
+   async Task<Location?> ValidateLocationAsync(int? locationId)
+   {
+      Location? location = null;
+      if (locationId.HasValue) location = await _locationService.GetByIdAsync(locationId.Value);
+
+      if (location is null) ModelState.AddModelError(nameof(Category), ValidationMessages.NotExist(Labels.Location));
+      return location!;
+   }
+   
 }
