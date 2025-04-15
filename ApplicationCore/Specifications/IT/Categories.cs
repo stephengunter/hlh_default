@@ -15,7 +15,7 @@ public class CategoriesSpecification : BaseCategoriesSpecification
 {
    public CategoriesSpecification(string entityType)
    {
-      Query.Where(item => item.EntityType == entityType);
+      Query.Where(item => item.EntityType.ToLower() == entityType.ToLower());
    }
    public CategoriesSpecification(ICollection<int> ids)
    {

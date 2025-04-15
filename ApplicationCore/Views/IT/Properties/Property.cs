@@ -15,6 +15,7 @@ public class PropertyViewModel : EntityBaseView, IBaseRecordView
    public string PropertyTypeText => PropertyType == PropertyType.Property ? PropertyTypeTitles.Property : PropertyTypeTitles.Item;
    public string LocationName { get; set; } = String.Empty;
    public string CategoryName { get; set; } = String.Empty;
+   public string DeviceCode { get; set; } = String.Empty;
    public string BrandName { get; set; } = String.Empty;
    public string Name { get; set; } = String.Empty;
    public string Title { get; set; } = String.Empty;
@@ -26,6 +27,7 @@ public class PropertyViewModel : EntityBaseView, IBaseRecordView
    public string? UserName { get; set; }
    public string? UserId { get; set; }
    public int? LocationId { get; set; }
+   public int? DeviceId { get; set; }
    public DateTime? BuyDate { get; set; }
    public DateTime? GetDate { get; set; }
    public DateTime? DownDate { get; set; }
@@ -76,6 +78,7 @@ public class PropertyLabels
    public string DownDate => "下架日期";
    public string GetDate => "取得日期";
    public string BuyDate => "購置日期";
+   public string DeviceCode => "設備編號";
    public string Ps => "備註";
 }
 public class PropertiesGroupView

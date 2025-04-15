@@ -5,6 +5,7 @@ using ApplicationCore.Specifications.Identity;
 using ApplicationCore.Specifications.IT;
 using ApplicationCore.Views.IT;
 using Ardalis.Specification;
+using AutoMapper;
 using Infrastructure.Helpers;
 using Infrastructure.Interfaces;
 using System.Collections.Generic;
@@ -14,6 +15,7 @@ namespace ApplicationCore.Services.IT;
 public interface IPropertyService
 {
    Task<IEnumerable<Property>> FetchAllAsync();
+   Task<IEnumerable<Property>> FetchAsync(Category category, ICollection<string>? includes = null);
    Task<IEnumerable<Property>> FetchAsync(bool deprecated, ICollection<string>? includes = null);
    Task<Property?> FetchByNumberAsync(string num);
    Task<Property?> FindByNumberAsync(string num, bool deprecated, PropertyType type);
@@ -32,17 +34,22 @@ public class PropertyService : IPropertyService
    private readonly IDefaultRepository<Location> _locationRepository;
    private readonly IDefaultRepository<Category> _categoryRepository;
    private readonly IDefaultRepository<Profiles> _profilesrepository;
+   private readonly IDefaultRepository<Device> _devicesrepository;
    public PropertyService(IDefaultRepository<Property> repository, IDefaultRepository<Category> categoryRepository,
-      IDefaultRepository<Location> locationRepository, IDefaultRepository<Profiles> profilesrepository)
+      IDefaultRepository<Location> locationRepository, IDefaultRepository<Profiles> profilesrepository,
+      IDefaultRepository<Device> devicesrepository)
 	{
       _repository = repository;
       _categoryRepository = categoryRepository;
       _profilesrepository = profilesrepository;
       _locationRepository = locationRepository;
+      _devicesrepository = devicesrepository;
 
    }
    public async Task<IEnumerable<Property>> FetchAllAsync()
-       => await _repository.ListAsync();
+       => await _repository.ListAsync(); 
+   public async Task<IEnumerable<Property>> FetchAsync(Category category, ICollection<string>? includes = null)
+       => await _repository.ListAsync(new PropertySpecification(category, includes));
    public async Task<IEnumerable<Property>> FetchAsync(bool fired, ICollection<string>? includes = null)
        => await _repository.ListAsync(new PropertySpecification(fired, includes));
    public async Task<Property?> FetchByNumberAsync(string num)
@@ -107,19 +114,24 @@ public class PropertyService : IPropertyService
    {
       var list = await _repository.ListAsync();
       var updateList = new List<Property>();
+
+      var locations = await _locationRepository.ListAsync(new LocationsSpecification());
+      var categories = await _categoryRepository.ListAsync(new CategoriesSpecification(nameof(Property)));
+      var profiles = await _profilesrepository.ListAsync();
+      var devices = await _devicesrepository.ListAsync();
+
       foreach (var entity in list)
       {
          if (entity.DownDate.HasValue) entity.Order = -1;
          else entity.Order = 0;
-
-         var locations = await _locationRepository.ListAsync(new LocationsSpecification());
+        
          SetLocationId(entity, locations.ToList());
-
-         var categories = await _categoryRepository.ListAsync(new CategoriesSpecification(nameof(Property)));
+         
          SetCategoryId(entity, categories.ToList());
-
-         var profiles = await _profilesrepository.ListAsync();
+         
          SetUserId(entity, profiles.ToList());
+        
+         SetDevice(entity, devices.ToList());
 
          updateList.Add(entity);
       }
@@ -154,6 +166,21 @@ public class PropertyService : IPropertyService
          var profile = profiles.FirstOrDefault(x => x.Name == entity.UserName);
          if (profile == null) entity.UserId = null;
          else entity.UserId = profile.UserId;
+      }
+   }
+   void SetDevice(Property entity, IList<Device> devices)
+   {
+      if (string.IsNullOrEmpty(entity.Number)) return;
+      var device = devices.FirstOrDefault(x => x.PropNum == entity.Number);
+      if (device == null)
+      {
+         entity.DeviceCode = "";
+         entity.DeviceId = null;
+      }
+      else
+      {
+         entity.DeviceCode = device.No;
+         entity.DeviceId = device.Id;
       }
    }
 }

@@ -22,6 +22,10 @@ public abstract class BasePropertySpecification : Specification<Property>
 }
 public class PropertySpecification : BasePropertySpecification
 {
+   public PropertySpecification(Category category, ICollection<string>? includes = null) : base(includes)
+   {
+      Query.Where(x => x.CategoryId == category.Id);
+   }
    public PropertySpecification(bool deprecated, ICollection<string>? includes = null) : base(includes)
    {
       Query.Where(x => x.Deprecated == deprecated);

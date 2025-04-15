@@ -13,6 +13,8 @@ using ApplicationCore.Models.Identity;
 using Infrastructure.Consts;
 using ApplicationCore.Views.IT;
 using Infrastructure.Paging;
+using ApplicationCore.Authorization;
+using System.Collections.Generic;
 
 namespace ITApi.Controllers.Admin;
 
@@ -33,7 +35,6 @@ public class PropertiesController : BaseAdminController
    PropertyLabels Labels => new PropertyLabels();
    bool CanRemove(Property entity)
    {
-      if (entity.Active) return false;
       return true;
    }
 
@@ -58,7 +59,7 @@ public class PropertiesController : BaseAdminController
       return model;
    }
 
-   async Task<IEnumerable<Property>?> FetchAsync(bool deprecated, int down, int type)//, Category? selectedCategory, Location? selectedLocation)
+   async Task<IEnumerable<Property>?> FetchAsync(bool deprecated, int down, int type)
    {
       var includes = new List<string>();
       var properties = await _propertiesService.FetchAsync(deprecated, includes);
@@ -68,10 +69,6 @@ public class PropertiesController : BaseAdminController
 
       if (type == 0) properties = properties.Where(x => x.PropertyType == PropertyType.Item);
       else if (type == 1) properties = properties.Where(x => x.PropertyType == PropertyType.Property);
-
-      //if (selectedCategory != null) properties = properties.Where(x => x.CategoryId == selectedCategory!.Id);
-      //if (selectedLocation != null) properties = properties.Where(x => x.LocationId == selectedLocation!.Id);
-      //properties = properties.GetOrdered();
 
       return properties;
    }
@@ -220,8 +217,56 @@ public class PropertiesController : BaseAdminController
       string contentType = FileContentType.Excel;
       return File(stream, contentType, excelFileName);
    }
-   
-   
+   [HttpDelete("{id}")]
+   public async Task<IActionResult> Remove(int id)
+   {
+      var entity = await _propertiesService.GetByIdAsync(id);
+      if (entity == null) return NotFound();
+
+      if (!CanRemove(entity))
+      {
+         ModelState.AddModelError("active", "此紀錄不允許刪除");
+         return BadRequest(ModelState);
+      }
+
+      await _propertiesService.RemoveAsync(entity, User.Id());
+
+      return NoContent();
+   }
+
+   [HttpGet("editCategory/{id}")]
+   public async Task<ActionResult<CategoryEditRequest>> EditCategory(int id)
+   {
+      var category = await _categoryService.GetByIdAsync(id);
+      if (category == null) return NotFound();
+
+      var props = await _propertiesService.FetchAsync(category);
+      bool canRemove = props.IsNullOrEmpty();
+      var form = new CategoryEditForm();
+      category.SetValuesTo(form);
+
+      return new CategoryEditRequest(form, canRemove);
+   }
+   [HttpDelete("removeCategory/{id}")]
+   public async Task<IActionResult> RemoveCategory(int id)
+   {
+      var category = await _categoryService.GetByIdAsync(id);
+      if (category == null) return NotFound();
+
+      var props = await _propertiesService.FetchAsync(category);
+      bool canRemove = props.IsNullOrEmpty();
+
+      if (!canRemove)
+      {
+         ModelState.AddModelError("", "此紀錄不允許刪除");
+         return BadRequest(ModelState);
+      }
+
+      await _categoryService.RemoveAsync(category);
+      return NoContent();
+   }
+
+
    async Task<Category?> ValidateCategoryAsync(int? categoryId)
    {
       Category? category  = null;
@@ -239,4 +284,5 @@ public class PropertiesController : BaseAdminController
       return location!;
    }
    
+
 }

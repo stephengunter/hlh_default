@@ -3,6 +3,7 @@ using ApplicationCore.Models.IT;
 using ApplicationCore.Specifications.IT;
 using Ardalis.Specification;
 using Infrastructure.Interfaces;
+using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace ApplicationCore.Services.IT;
@@ -15,8 +16,9 @@ public interface ICategoryService
    Task<Category> CreateAsync(Category Category);
 
    Task AddRangeAsync(ICollection<Category> entities);
-   Task UpdateAsync(Category Category);
+   Task UpdateAsync(Category entity);
    Task UpdateRangeAsync(ICollection<Category> entities);
+   Task RemoveAsync(Category entity);
 }
 
 public class CategorysService : ICategoryService
@@ -53,5 +55,11 @@ public class CategorysService : ICategoryService
 
    public async Task UpdateRangeAsync(ICollection<Category> entities)
       => await _repository.UpdateRangeAsync(entities);
+
+   public async Task RemoveAsync(Category entity)
+   {
+      entity.Removed = true;
+      await _repository.UpdateAsync(entity);
+   }
 
 }

@@ -8,6 +8,7 @@ using Infrastructure.Views;
 using OfficeOpenXml;
 using ApplicationCore.Views;
 using OfficeOpenXml.Style;
+using System.Collections.Generic;
 
 namespace ApplicationCore.Helpers.IT;
 public static class PropertyHelpers
@@ -123,7 +124,8 @@ public class PropertyExcelHelpers
             worksheet.Cells[rowIndex, 6].Value = view.Type;
             worksheet.Cells[rowIndex, 7].Value = view.UserName;
             worksheet.Cells[rowIndex, 8].Value = view.LocationName;
-            worksheet.Cells[rowIndex, 9].Value = view.Ps;
+            worksheet.Cells[rowIndex, 9].Value = view.DeviceCode;
+            worksheet.Cells[rowIndex, 10].Value = view.Ps;
             worksheet.Row(rowIndex).Height = height;
             rowIndex += 1;
          }
@@ -177,83 +179,165 @@ public class PropertyExcelHelpers
       list.Add(new ReportColumn(nameof(labels.Type), labels.Type, unit * 2 + 5));
       list.Add(new ReportColumn(nameof(labels.UserName), labels.UserName, unit));
       list.Add(new ReportColumn(nameof(labels.Location), labels.Location, unit));
-      list.Add(new ReportColumn(nameof(labels.Ps), labels.Ps, unit * 2));
+      list.Add(new ReportColumn(nameof(labels.DeviceCode), labels.DeviceCode, unit));
+      list.Add(new ReportColumn(nameof(labels.Ps), labels.Ps, unit));
       return list;
    }
    public static List<SourcePropertyModel> GetPropertyListFromFile(MemoryStream stream, PropertyType proptype)
    {
       ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-      var list = new List<SourcePropertyModel>();
       using (var package = new ExcelPackage(stream))
       {
          var worksheet = package.Workbook.Worksheets[0];
+
          if (worksheet == null) throw new InvalidOperationException("No worksheet found in the Excel file.");
          if (worksheet.Dimension == null) throw new InvalidOperationException("The worksheet is empty.");
          int rowCount = worksheet.Dimension.Rows; // Total rows
          int colCount = worksheet.Dimension.Columns; // Total columns
-         var columnMapping = new Dictionary<string, int>();
-         for (int col = 1; col <= colCount; col++)
+         var columnMapping = GetColumnMapping(worksheet);
+
+         if (columnMapping.ContainsKey("資訊設備種類")) return GetPropertyListFromITSheet(worksheet, columnMapping);
+         return GetPropertyListFromSheet(worksheet, proptype, columnMapping);
+      }
+   }
+   static List<SourcePropertyModel> GetPropertyListFromSheet(ExcelWorksheet worksheet, PropertyType proptype, Dictionary<string, int> columnMapping)
+   {
+      var list = new List<SourcePropertyModel>();
+      int numCol = columnMapping["財產編號"];
+      int categoryNameCol = columnMapping["財產名稱"];
+      int nameCol = columnMapping["財產別名"];
+      int minyearCol = columnMapping["最低使用年限"];
+      int buyDateCol = columnMapping["購置日期"];
+      int getDateCol = columnMapping["取得日期"];
+      int typeCol = columnMapping["型式"];
+      int brandCol = columnMapping["廠牌"];
+      int usernameCol = columnMapping["保管人(名稱)"];
+
+      int locationCodeCol = columnMapping["存置地點(代碼)"];
+      int locationNameCol = columnMapping["存置地點(名稱)"];
+      int deprecatedCol = columnMapping["是否減損"];
+
+      int rowCount = worksheet.Dimension.Rows; // Total rows
+      for (int row = 2; row <= rowCount; row++)
+      {
+         string num = worksheet.Cells[row, numCol].Text.Trim(); //3101001-0007-0000001
+         string categoryName = worksheet.Cells[row, categoryNameCol].Text.Trim(); //不斷電裝置
+         string name = worksheet.Cells[row, nameCol].Text.Trim(); //財產別名
+         string minyear = worksheet.Cells[row, minyearCol].Text.Trim(); //最低使用年限
+         string buyDate = worksheet.Cells[row, buyDateCol].Text.Trim(); //購置日期
+         string getDate = worksheet.Cells[row, getDateCol].Text.Trim(); //取得日期
+         string type = worksheet.Cells[row, typeCol].Text.Trim(); //型式
+         string brand = worksheet.Cells[row, brandCol].Text.Trim(); //廠牌
+                                                                    //string userCode = worksheet.Cells[row, userCodeCol].Text.Trim(); //保管人(代碼)
+         string username = worksheet.Cells[row, usernameCol].Text.Trim(); //保管人(名稱)
+         string locationCode = worksheet.Cells[row, locationCodeCol].Text.Trim(); //存置地點(代碼)
+         string locationName = worksheet.Cells[row, locationNameCol].Text.Trim(); //存置地點(名稱)
+
+         string deprecated = worksheet.Cells[row, deprecatedCol].Text.Trim(); //是否減損
+
+         var item = new SourcePropertyModel()
          {
-            string header = worksheet.Cells[1, col].Text.Trim();
-            if (!string.IsNullOrEmpty(header) && !columnMapping.ContainsKey(header))
-            {
-               columnMapping[header] = col; // Store column index by name
-            }
-         }
-         int numCol = columnMapping["財產編號"];
-         int categoryNameCol = columnMapping["財產名稱"];
-         int nameCol = columnMapping["財產別名"];
-         int minyearCol = columnMapping["最低使用年限"];
-         int buyDateCol = columnMapping["購置日期"];
-         int getDateCol = columnMapping["取得日期"];
-         int typeCol = columnMapping["型式"];
-         int brandCol = columnMapping["廠牌"];
-         int usernameCol = columnMapping["保管人(名稱)"];
+            PropertyType = proptype,
+            Number = num.ToPropNumber(),
+            CategoryName = categoryName,
+            Name = name,
+            MinYears = minyear.Replace("年", "").Trim().ToInt(),
+            BuyDate = buyDate.Replace("/", "").Trim().ToInt().RocToDatetime(),
+            GetDate = buyDate.Replace("/", "").Trim().ToInt().RocToDatetime(),
+            Type = type,
+            BrandName = brand,
+            UserName = username.Split('（')[0],
+            LocationCode = locationCode,
+            LocationName = locationName,
 
-         int locationCodeCol = columnMapping["存置地點(代碼)"];
-         int locationNameCol = columnMapping["存置地點(名稱)"];
-         int deprecatedCol = columnMapping["是否減損"];
-
-         for (int row = 2; row <= rowCount; row++)
-         {
-            string num = worksheet.Cells[row, numCol].Text.Trim(); //3101001-0007-0000001
-            string categoryName = worksheet.Cells[row, categoryNameCol].Text.Trim(); //不斷電裝置
-            string name = worksheet.Cells[row, nameCol].Text.Trim(); //財產別名
-            string minyear = worksheet.Cells[row, minyearCol].Text.Trim(); //最低使用年限
-            string buyDate = worksheet.Cells[row, buyDateCol].Text.Trim(); //購置日期
-            string getDate = worksheet.Cells[row, getDateCol].Text.Trim(); //取得日期
-            string type = worksheet.Cells[row, typeCol].Text.Trim(); //型式
-            string brand = worksheet.Cells[row, brandCol].Text.Trim(); //廠牌
-            //string userCode = worksheet.Cells[row, userCodeCol].Text.Trim(); //保管人(代碼)
-            string username = worksheet.Cells[row, usernameCol].Text.Trim(); //保管人(名稱)
-            string locationCode = worksheet.Cells[row, locationCodeCol].Text.Trim(); //存置地點(代碼)
-            string locationName = worksheet.Cells[row, locationNameCol].Text.Trim(); //存置地點(名稱)
-           
-            string deprecated = worksheet.Cells[row, deprecatedCol].Text.Trim(); //是否減損
-
-            var item = new SourcePropertyModel()
-            {
-               PropertyType = proptype,
-               Number = num.ToPropNumber(),
-               CategoryName = categoryName,
-               Name = name,
-               MinYears = minyear.Replace("年", "").Trim().ToInt(),
-               BuyDate = buyDate.Replace("/", "").Trim().ToInt().RocToDatetime(),
-               GetDate = buyDate.Replace("/", "").Trim().ToInt().RocToDatetime(),
-               Type = type,
-               BrandName = brand,
-               UserName = username.Split('（')[0],
-               LocationCode = locationCode,
-               LocationName = locationName,
-               
-               Deprecated = deprecated == "是"
-            };
-            list.Add(item);
-         }
+            Deprecated = deprecated == "是"
+         };
+         list.Add(item);
       }
       return list;
    }
+   static Dictionary<string, int> GetColumnMapping(ExcelWorksheet worksheet)
+   {
+      int rowCount = worksheet.Dimension.Rows; // Total rows
+      int colCount = worksheet.Dimension.Columns; // Total columns
+      var columnMapping = new Dictionary<string, int>();
+      for (int col = 1; col <= colCount; col++)
+      {
+         string header = worksheet.Cells[1, col].Text.Trim();
+         if (!string.IsNullOrEmpty(header) && !columnMapping.ContainsKey(header))
+         {
+            columnMapping[header] = col; // Store column index by name
+         }
+      }
+      return columnMapping;
+   }
+   static List<SourcePropertyModel> GetPropertyListFromITSheet(ExcelWorksheet worksheet, Dictionary<string, int> columnMapping)
+   {
+      var list = new List<SourcePropertyModel>();
 
+      int proptypeCol = columnMapping["資訊設備種類"];
+      int numCol = columnMapping["財產編號"];
+      int categoryNameCol = columnMapping["財產名稱"];
+      int titleCol = columnMapping["設備名稱"];
+      int nameCol = columnMapping["財產別名"];
+      int minyearCol = columnMapping["最低使用年限"];
+      int buyDateCol = columnMapping["購置日期"];
+      int getDateCol = columnMapping["取得日期"];
+      int typeCol = columnMapping["型式"];
+      int brandCol = columnMapping["廠牌"];
+
+      //int userCodeCol = columnMapping["保管人(代碼)"];
+      int usernameCol = columnMapping["保管人(名稱)"];
+
+      int locationCodeCol = columnMapping["存置地點(代碼)"];
+      int locationNameCol = columnMapping["存置地點(名稱)"];
+
+      int downdateCol = columnMapping["已下架日期"];
+      int deprecatedCol = columnMapping["是否減損"];
+
+      int rowCount = worksheet.Dimension.Rows; // Total rows
+      for (int row = 2; row <= rowCount; row++)
+      {
+         string proptype = worksheet.Cells[row, proptypeCol].Text.Trim(); //物品
+         string num = worksheet.Cells[row, numCol].Text.Trim(); //3101001-0007-0000001
+         string categoryName = worksheet.Cells[row, categoryNameCol].Text.Trim(); //不斷電裝置
+         string title = worksheet.Cells[row, titleCol].Text.Trim(); //設備名稱
+         string name = worksheet.Cells[row, nameCol].Text.Trim(); //財產別名
+         string minyear = worksheet.Cells[row, minyearCol].Text.Trim(); //最低使用年限
+         string buyDate = worksheet.Cells[row, buyDateCol].Text.Trim(); //購置日期
+         string getDate = worksheet.Cells[row, getDateCol].Text.Trim(); //取得日期
+         string type = worksheet.Cells[row, typeCol].Text.Trim(); //型式
+         string brand = worksheet.Cells[row, brandCol].Text.Trim(); //廠牌
+                                                                    //string userCode = worksheet.Cells[row, userCodeCol].Text.Trim(); //保管人(代碼)
+         string username = worksheet.Cells[row, usernameCol].Text.Trim(); //保管人(名稱)
+         string locationCode = worksheet.Cells[row, locationCodeCol].Text.Trim(); //存置地點(代碼)
+         string locationName = worksheet.Cells[row, locationNameCol].Text.Trim(); //存置地點(名稱)
+         string downdate = worksheet.Cells[row, downdateCol].Text.Trim(); //已下架日期
+         string deprecated = worksheet.Cells[row, deprecatedCol].Text.Trim(); //是否減損
+
+         var item = new SourcePropertyModel()
+         {
+            PropertyType = proptype == "物品" ? PropertyType.Item : PropertyType.Property,
+            Number = num.ToPropNumber(),
+            CategoryName = categoryName,
+            Title = title,
+            Name = name,
+            MinYears = minyear.Replace("年", "").Trim().ToInt(),
+            BuyDate = buyDate.Replace("/", "").Trim().ToInt().RocToDatetime(),
+            GetDate = buyDate.Replace("/", "").Trim().ToInt().RocToDatetime(),
+            Type = type,
+            BrandName = brand,
+            //UserCode = userCode,
+            UserName = username.Split('（')[0],
+            LocationCode = locationCode,
+            LocationName = locationName,
+            DownDate = downdate.Replace("/", "").Trim().ToInt().RocToDatetime(),
+            Deprecated = deprecated == "是"
+         };
+         list.Add(item);
+      }
+      return list;
+   }
    public static List<SourcePropertyModel> GetPropertyListFromITFile(MemoryStream stream)
    {
       //資訊設備輸出Excel
@@ -266,15 +350,15 @@ public class PropertyExcelHelpers
          if (worksheet.Dimension == null) throw new InvalidOperationException("The worksheet is empty.");
          int rowCount = worksheet.Dimension.Rows; // Total rows
          int colCount = worksheet.Dimension.Columns; // Total columns
-         var columnMapping = new Dictionary<string, int>();
-         for (int col = 1; col <= colCount; col++)
-         {
-            string header = worksheet.Cells[1, col].Text.Trim();
-            if (!string.IsNullOrEmpty(header) && !columnMapping.ContainsKey(header))
-            {
-               columnMapping[header] = col; // Store column index by name
-            }
-         }
+         var columnMapping = GetColumnMapping(worksheet); // new Dictionary<string, int>();
+         //for (int col = 1; col <= colCount; col++)
+         //{
+         //   string header = worksheet.Cells[1, col].Text.Trim();
+         //   if (!string.IsNullOrEmpty(header) && !columnMapping.ContainsKey(header))
+         //   {
+         //      columnMapping[header] = col; // Store column index by name
+         //   }
+         //}
          int proptypeCol = columnMapping["資訊設備種類"];
          int numCol = columnMapping["財產編號"];
          int categoryNameCol = columnMapping["財產名稱"];

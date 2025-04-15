@@ -9,7 +9,7 @@ public class Device : EntityBase, IBaseRecord, IRemovable, ISortable
 {
    public int? OldId { get; set; } //no1
    public string? Title { get; set; } //script
-   public string? No { get; set; }  //de_no
+   public string No { get; set; }  = string.Empty;
    public string? Kind { get; set; } //de_kind
    public string? PropNum { get; set; } //de_hlhno
    public string? Room { get; set; } //room
