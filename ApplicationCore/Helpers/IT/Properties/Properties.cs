@@ -110,7 +110,7 @@ public class PropertyExcelHelpers
             worksheet.Column(i + 1).Width = reportColumns[i].Width;
             worksheet.Cells[rowIndex, i + 1].Value = reportColumns[i].Title;
             worksheet.Row(rowIndex).Height = height;
-            worksheet.Cells[rowIndex, 1, rowIndex, cols].Style.Font.Size = 11;
+            worksheet.Cells[rowIndex, 1, rowIndex, cols].Style.Font.Size = 10;
             worksheet.Cells[rowIndex, 1, rowIndex, cols].Style.Font.Bold = true;
          }
          rowIndex += 1;
@@ -127,6 +127,7 @@ public class PropertyExcelHelpers
             worksheet.Cells[rowIndex, 9].Value = view.DeviceCode;
             worksheet.Cells[rowIndex, 10].Value = view.Ps;
             worksheet.Row(rowIndex).Height = height;
+            worksheet.Row(rowIndex).Style.Font.Size = 10;
             rowIndex += 1;
          }
 
@@ -171,16 +172,16 @@ public class PropertyExcelHelpers
       var labels = new PropertyLabels();
       int unit = 10;
       var list = new List<ReportColumn>();
-      list.Add(new ReportColumn(nameof(labels.PropertyType), labels.PropertyType, unit));
-      list.Add(new ReportColumn(nameof(labels.Category), labels.Category, unit));
-      list.Add(new ReportColumn(nameof(labels.Title), labels.Title, unit * 2 + 5));
-      list.Add(new ReportColumn(nameof(labels.Number), labels.Number, unit * 2 + 5));
-      list.Add(new ReportColumn(nameof(labels.Brand), labels.Brand, unit + 5));
-      list.Add(new ReportColumn(nameof(labels.Type), labels.Type, unit * 2 + 5));
-      list.Add(new ReportColumn(nameof(labels.UserName), labels.UserName, unit));
-      list.Add(new ReportColumn(nameof(labels.Location), labels.Location, unit));
-      list.Add(new ReportColumn(nameof(labels.DeviceCode), labels.DeviceCode, unit));
-      list.Add(new ReportColumn(nameof(labels.Ps), labels.Ps, unit));
+      list.Add(new ReportColumn(nameof(labels.PropertyType), labels.PropertyType, 8));
+      list.Add(new ReportColumn(nameof(labels.Category), labels.Category, 15));
+      list.Add(new ReportColumn(nameof(labels.Title), labels.Title, 25));
+      list.Add(new ReportColumn(nameof(labels.Number), labels.Number, 20));
+      list.Add(new ReportColumn(nameof(labels.Brand), labels.Brand, 10));
+      list.Add(new ReportColumn(nameof(labels.Type), labels.Type, 20));
+      list.Add(new ReportColumn(nameof(labels.UserName), labels.UserName, 8));
+      list.Add(new ReportColumn(nameof(labels.Location), labels.Location, 12));
+      list.Add(new ReportColumn(nameof(labels.DeviceCode), labels.DeviceCode, 8));
+      list.Add(new ReportColumn(nameof(labels.Ps), labels.Ps, 8));
       return list;
    }
    public static List<SourcePropertyModel> GetPropertyListFromFile(MemoryStream stream, PropertyType proptype)

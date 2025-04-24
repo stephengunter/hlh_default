@@ -15,6 +15,8 @@ using ApplicationCore.Views.IT;
 using Infrastructure.Paging;
 using ApplicationCore.Authorization;
 using System.Collections.Generic;
+using ApplicationCore.Views.Identity;
+using System.Net;
 
 namespace ITApi.Controllers.Admin;
 
@@ -46,36 +48,59 @@ public class PropertiesController : BaseAdminController
 
       var locations = await _locationService.FetchAsync();
 
-      bool deprecated = false;
-      int down = 0;
-      int type = -1;
-      int category = 0;
-      int? location = null;
-      int page = 1;
-      int pageSize = 10;
-      var request = new PropertiesFetchRequest(deprecated, down, type, category, location, page, pageSize);
-      var model = new PropertiesAdminModel(request, categories.MapViewModelList(_mapper), locations.MapViewModelList(_mapper));
+      var request = new PropertiesFetchRequest();
+      request.Type = -1;
+      request.Device = -1;
+      request.Page = 1;
+      request.PageSize = 10;
 
-      return model;
+      return new PropertiesAdminModel(request, categories.MapViewModelList(_mapper), locations.MapViewModelList(_mapper));
    }
 
-   async Task<IEnumerable<Property>?> FetchAsync(bool deprecated, int down, int type)
+   //async Task<IEnumerable<Property>?> FetchAsync(bool deprecated, int down, int type)
+   //{
+   //   var includes = new List<string>();
+   //   var properties = await _propertiesService.FetchAsync(deprecated, includes);
+
+   //   if(down < 0) properties = properties.Where(x => !x.Active);
+   //   else if (down > 0) properties = properties.Where(x => x.Active);
+
+   //   if (type == 0) properties = properties.Where(x => x.PropertyType == PropertyType.Item);
+   //   else if (type == 1) properties = properties.Where(x => x.PropertyType == PropertyType.Property);
+
+   //   return properties;
+   //}
+   async Task<IEnumerable<Property>?> FetchAsync(PropertiesFetchRequest request)
    {
       var includes = new List<string>();
-      var properties = await _propertiesService.FetchAsync(deprecated, includes);
+      var properties = await _propertiesService.FetchAsync(request.Deprecated, includes);
 
-      if(down < 0) properties = properties.Where(x => !x.Active);
-      else if (down > 0) properties = properties.Where(x => x.Active);
+      if (request.Down < 0) properties = properties.Where(x => !x.Active);
+      else if (request.Down > 0) properties = properties.Where(x => x.Active);
 
-      if (type == 0) properties = properties.Where(x => x.PropertyType == PropertyType.Item);
-      else if (type == 1) properties = properties.Where(x => x.PropertyType == PropertyType.Property);
+      if (request.Type == 0) properties = properties.Where(x => x.PropertyType == PropertyType.Item);
+      else if (request.Type == 1) properties = properties.Where(x => x.PropertyType == PropertyType.Property);
+
+      if (request.Device == 0) properties = properties!.Where(x => !x.IsItDevice);
+      else if (request.Device > 0) properties = properties!.Where(x => x.IsItDevice);
 
       return properties;
    }
 
    [HttpGet]
-   public async Task<ActionResult<PropertiesIndexModel>> Index(bool deprecated, int down, int type, int category, int? location, int page = 1, int pageSize = 10)
+   public async Task<ActionResult<PropertiesIndexModel>> Index(bool deprecated, int down, int type, int category, int device, int? location, int page = 1, int pageSize = 10)
    {
+      var request = new PropertiesFetchRequest();
+      request.Deprecated = deprecated;
+      request.Down = down;
+      request.Type = type;
+      request.Category = category;
+      request.Device = device;
+      request.Location = location;
+
+      request.Page = page;
+      request.PageSize = pageSize;
+
       Category? selectedCategory = null;
       if (category > 0)
       {
@@ -98,9 +123,12 @@ public class PropertiesController : BaseAdminController
          }
       }
 
-      var properties = await FetchAsync(deprecated, down, type);
+      var properties = await FetchAsync(request);
       if (selectedCategory != null) properties = properties!.Where(x => x.CategoryId == selectedCategory!.Id);
       else if (category < 0) properties = properties!.Where(x => !x.CategoryId.HasValue);
+
+      if(device == 0) properties = properties!.Where(x => !x.IsItDevice);
+      else if (device > 0) properties = properties!.Where(x => x.IsItDevice);
 
       if (selectedLocation != null) properties = properties!.Where(x => x.LocationId == selectedLocation!.Id);
 
@@ -114,6 +142,35 @@ public class PropertiesController : BaseAdminController
 
       var pageList = properties!.GetPagedList(_mapper, page, pageSize);
       return new PropertiesIndexModel(pageList, groupViews);
+   }
+   [HttpGet("edit/{id}")]
+   public async Task<ActionResult<PropertiesEditRequest>> Edit(int id)
+   {
+      var entity = await _propertiesService.GetByIdAsync(id);
+      if (entity == null) return NotFound();
+
+      var view = entity.MapViewModel(_mapper);
+
+      var form = new PropertyEditForm();
+      entity.SetValuesTo(form);
+     
+      var model = new PropertiesEditRequest(view, form);
+      model.CanRemove = CanRemove(entity);
+      return model;
+   }
+   [HttpPut("{id}")]
+   public async Task<IActionResult> Update(int id, [FromBody] PropertyEditForm form)
+   {
+      var entity = await _propertiesService.GetByIdAsync(id);
+      if (entity == null) return NotFound();
+
+      ValidateRequest(form, id);
+      if (!ModelState.IsValid) return BadRequest(ModelState);
+
+      form.SetValuesTo(entity);
+
+      await _propertiesService.UpdateAsync(entity, User.Id());
+      return NoContent();
    }
    [HttpPost("upload")]
    public async Task<ActionResult<PagedList<SourcePropertyModel>>> Upload([FromForm] PropertiesUploadRequest request)
@@ -165,6 +222,18 @@ public class PropertiesController : BaseAdminController
    [HttpPost("reports")]
    public async Task<IActionResult> Reports(PropertiesFetchRequest request)
    {
+      //var request = new PropertiesFetchRequest();
+      //request.Deprecated = deprecated;
+      //request.Down = down;
+      //request.Type = type;
+      //request.Category = category;
+      //request.Device = device;
+      //request.Location = location;
+
+      //request.Page = page;
+      //request.PageSize = pageSize;
+      request.Type = -1;
+
       bool deprecated = false;
       int down = 0;
       int type = -1;
@@ -182,7 +251,7 @@ public class PropertiesController : BaseAdminController
          return BadRequest(ModelState);
       }
 
-      var properties = await FetchAsync(deprecated, down, type);
+      var properties = await FetchAsync(request);
       properties = properties!.Where(x => x.LocationId == selectedLocation!.Id);
 
       if (properties.IsNullOrEmpty())
@@ -266,23 +335,26 @@ public class PropertiesController : BaseAdminController
       return NoContent();
    }
 
-
-   async Task<Category?> ValidateCategoryAsync(int? categoryId)
+   void ValidateRequest(PropertyEditForm model, int id = 0)
    {
-      Category? category  = null;
-      if (categoryId.HasValue) category = await _categoryService.GetByIdAsync(categoryId.Value);
       
-      if (category is null) ModelState.AddModelError(nameof(Category), ValidationMessages.NotExist(Labels.Category));
-      return category!;
    }
-   async Task<Location?> ValidateLocationAsync(int? locationId)
-   {
-      Location? location = null;
-      if (locationId.HasValue) location = await _locationService.GetByIdAsync(locationId.Value);
+   //async Task<Category?> ValidateCategoryAsync(int? categoryId)
+   //{
+   //   Category? category  = null;
+   //   if (categoryId.HasValue) category = await _categoryService.GetByIdAsync(categoryId.Value);
+      
+   //   if (category is null) ModelState.AddModelError(nameof(Category), ValidationMessages.NotExist(Labels.Category));
+   //   return category!;
+   //}
+   //async Task<Location?> ValidateLocationAsync(int? locationId)
+   //{
+   //   Location? location = null;
+   //   if (locationId.HasValue) location = await _locationService.GetByIdAsync(locationId.Value);
 
-      if (location is null) ModelState.AddModelError(nameof(Category), ValidationMessages.NotExist(Labels.Location));
-      return location!;
-   }
+   //   if (location is null) ModelState.AddModelError(nameof(Category), ValidationMessages.NotExist(Labels.Location));
+   //   return location!;
+   //}
    
 
 }

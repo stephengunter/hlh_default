@@ -18,18 +18,24 @@ public class PropertiesAdminModel
       Request = request;
       Categories = categories;
       Locations = locations;
-      var options = new List<BaseOption<int>>()
+      TypeOptions = new List<BaseOption<int>>()
       {
          new BaseOption<int>(-1, "全部"),
          new BaseOption<int>((int)PropertyType.Item, PropertyTypeTitles.Item),
          new BaseOption<int>((int)PropertyType.Property, PropertyTypeTitles.Property)
       };
-      TypeOptions = options;
+      DeviceOptions = new List<BaseOption<int>>()
+      {
+         new BaseOption<int>(-1, "全部"),
+         new BaseOption<int>(0, "否"),
+         new BaseOption<int>(1, "是")
+      };
    }
    public PropertiesFetchRequest Request { get; set; }
    public ICollection<CategoryViewModel> Categories { get; set; }
    public ICollection<LocationViewModel> Locations { get; set; }
    public List<BaseOption<int>> TypeOptions { get; set; }
+   public List<BaseOption<int>> DeviceOptions { get; set; }
    public PropertyLabels Labels => new PropertyLabels();
 }
 public class PropertiesIndexModel
@@ -47,20 +53,22 @@ public class PropertiesFetchRequest
    public PropertiesFetchRequest()
    { 
    }
-   public PropertiesFetchRequest(bool deprecated, int down, int type, int category, int? location, int page = 1, int pageSize = 10)
-   {
-      Deprecated = deprecated;
-      Down = down;
-      Type = type;
-      Category = category;
-      Location = location;
-      Page = page;
-      PageSize = pageSize;
-   }
+   //public PropertiesFetchRequest(bool deprecated, int down, int type, int category, int device, int? location, int page = 1, int pageSize = 10)
+   //{
+   //   Deprecated = deprecated;
+   //   Down = down;
+   //   Type = type;
+   //   Category = category;
+   //   Device = device;
+   //   Location = location;
+   //   Page = page;
+   //   PageSize = pageSize;
+   //}
    public bool Deprecated { get; set; }
    public int Down { get; set; }
    public int Type { get; set; }
    public int Category { get; set; }
+   public int Device { get; set; }
    public int? Location { get; set; }
    public int? Page { get; set; }
    public int? PageSize { get; set; }
@@ -73,4 +81,21 @@ public class PropertiesUploadRequest
 public class PropertiesImportRequest
 {
    public List<SourcePropertyModel> List { get; set; } = new List<SourcePropertyModel>();
+}
+
+
+public class PropertiesEditRequest
+{
+   public PropertiesEditRequest(PropertyViewModel property, PropertyEditForm form)
+   {
+      Property = property;
+      Form = form;
+   }
+   public bool CanRemove { get; set; }
+   public PropertyViewModel Property { get; set; }
+   public PropertyEditForm Form { get; set; }
+}
+public class PropertyEditForm
+{
+   public bool IsItDevice { get; set; }
 }

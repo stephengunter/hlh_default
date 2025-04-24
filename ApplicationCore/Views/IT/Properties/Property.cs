@@ -10,6 +10,7 @@ namespace ApplicationCore.Views.IT;
 
 public class PropertyViewModel : EntityBaseView, IBaseRecordView
 {
+   public bool IsItDevice { get; set; }
    public int? CategoryId { get; set; }
    public PropertyType PropertyType { get; set; }
    public string PropertyTypeText => PropertyType == PropertyType.Property ? PropertyTypeTitles.Property : PropertyTypeTitles.Item;
@@ -78,6 +79,7 @@ public class PropertyLabels
    public string DownDate => "下架日期";
    public string GetDate => "取得日期";
    public string BuyDate => "購置日期";
+   public string ItDevice => "資訊設備";
    public string DeviceCode => "設備編號";
    public string Ps => "備註";
 }

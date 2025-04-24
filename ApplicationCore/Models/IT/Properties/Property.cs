@@ -7,6 +7,7 @@ namespace ApplicationCore.Models.IT;
 [Table("IT.Properties")]
 public class Property : EntityBase, IBaseRecord, IRemovable, ISortable
 {
+   public bool IsItDevice { get; set; }
    public int? CategoryId { get; set; }
    public PropertyType PropertyType { get; set; }
    public string LocationName { get; set; } = String.Empty;
