@@ -57,9 +57,10 @@ public class DevicesController : BaseAdminController
       root!.Title = "所有設備分類";
       root!.LoadSubItems(categories);
       
-      bool fired = false;
-      int? category = null;
-      var request = new DevicesFetchRequest(fired, category);
+      var request = new DevicesFetchRequest();
+      request.Category = root.Id;
+      request.Page = 1;
+      request.PageSize = 10;
       var model = new DevicesAdminModel(request, root.MapViewModel(_mapper), 
          categories.MapViewModelList(_mapper), locations.MapViewModelList(_mapper));
 
@@ -67,7 +68,6 @@ public class DevicesController : BaseAdminController
 
       return model;
    }
-
    async Task<IEnumerable<Device>> FetchAsync(bool fired, Category? selectedCategory, Location? selectedLocation)
    {
       var includes = new List<string>();
@@ -91,14 +91,15 @@ public class DevicesController : BaseAdminController
    }
 
    [HttpGet]
-   public async Task<ActionResult<PagedList<Device, DeviceViewModel>>> Index(bool fired, int? category, int? location, int page = 1, int pageSize = 10)
+   public async Task<ActionResult<DevicesIndexModel>> Index(bool fired, int category, int? location, int page = 1, int pageSize = 10)
    {
-      Category selectedCategory = null;
-      if (category.HasValue)
+      Category? selectedCategory = null;
+      if (category > 0)
       {
-         selectedCategory = await ValidateCategoryAsync(category.Value, subItems: true);
+         selectedCategory = await ValidateCategoryAsync(category, subItems: true);
          if (!ModelState.IsValid) return BadRequest(ModelState);
       }
+
       Location? selectedLocation = null;
       if (location.HasValue)
       {
@@ -109,64 +110,36 @@ public class DevicesController : BaseAdminController
             return BadRequest(ModelState);
          }
       }
-
       var devices = await FetchAsync(fired, selectedCategory, selectedLocation);
 
+      devices = devices!.GetOrdered();
 
-      //if (selectedCategory is null)
-      //{
-      //   devices = await _deviceService.FetchNoneCategoryEntitiesAsync(fired, includes);
-      //}
-      //else
-      //{
-      //   var categories = new List<Category>() { selectedCategory };
-      //   if(selectedCategory.SubItems!.HasItems()) categories.AddRange(selectedCategory.GetAllSubItems());
+      var groupViews = new List<DevicesGroupView>();
+      if (selectedCategory != null && selectedCategory.IsRootItem && devices!.HasItems())
+      {
+         groupViews = devices!.GetPropertiesGroupViews();
+      }
 
-      //   devices = await _deviceService.FetchAsync(fired, categories, includes);
-      //}
-
-
-
-      var model = new PagedList<Device, DeviceViewModel>(devices!, page, pageSize);
-
-      model.SetViewList(model.List.MapViewModelList(_mapper));
-      return model;
-      //if (!active) return new DevicesIndexModel(devices.MapViewModelList(_mapper));
-
-      //var lastClosed = await _deviceReportService.GetLastClosedAsync();
-      //var sheets = await _deviceBalanceSheetService.FetchAsync(lastClosed!);
-
-      //var date = lastClosed!.GetDate();
-      //var transactions = await _transactionService.FetchAsync(date!.Value.AddDays(1));
-      //var year_transactions = await _transactionService.FetchAsync(DateTime.Today.AddYears(-1));
-      //foreach (var device in devices)
-      //{
-      //   int lastStock = 0;
-      //   var sh = sheets.FirstOrDefault(x => x.DeviceId == device.Id);
-      //   if (sh != null) lastStock = sh.Stock;
-
-      //   var trans = transactions.Where(x => x.DeviceId == device.Id);
-      //   if (trans.IsNullOrEmpty()) device.Stock = lastStock;
-      //   else device.Stock = lastStock + trans.Sum(x => x.Quantity);
-
-      //   var deviceYearTransactions = year_transactions.Where(x => x.DeviceId == device.Id && x.Quantity > 0);
-      //   if (deviceYearTransactions.IsNullOrEmpty()) device.SaveStock = 0;
-      //   else device.SaveStock = deviceYearTransactions.Sum(x => x.Quantity);
-
-      //}
-
-      //devices = devices.OrderByDescending(x => x.SaveStock);
-
-      //var model = new DevicesIndexModel(devices.MapViewModelList(_mapper));
-      //model.LastClosed = lastClosed!.MapViewModel(_mapper);
-      //return model;
+      var pageList = devices!.GetPagedList(_mapper, page, pageSize);
+      return new DevicesIndexModel(pageList, groupViews);
    }
 
    [HttpPost("imports")]
-   public async Task<ActionResult> Imports()
+   public async Task<ActionResult> Imports([FromForm] DevicesImportRequest request)
    {
-      var sourceList = DeviceOldDbHelpers.GetListFromOldDb(_HLHDBSettings.ConnectionString);
-      //await _deviceService.SyncAsync(sourceList);
+      
+      //var file = request.File;
+      //var errors = ValidateExcelFile(file!);
+      //AddErrors(errors);
+      //if (!ModelState.IsValid) return BadRequest(ModelState);
+
+      ////var list = new List<Device>();
+      ////using (var stream = new MemoryStream())
+      ////{
+      ////   await file!.CopyToAsync(stream);
+      ////   list = DeviceExcelHelpers.GetDeviceListFromFile(stream);
+      ////}
+      ////await _deviceService.SyncAsync(list);
       await _deviceService.RefreshAsync();
       return NoContent();
    }
@@ -263,4 +236,5 @@ public class DevicesController : BaseAdminController
       }
       return category!;
    }
+   
 }

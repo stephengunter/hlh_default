@@ -29,12 +29,12 @@ public class AATestsController : BaseTestController
 {
    
    private readonly DefaultContext _context;
-   private readonly IPropertyService _propertyService;
+   private readonly IDeviceService _deviceService;
    private readonly IMapper _mapper;
-   public AATestsController(DefaultContext context, IPropertyService propertyService, IMapper mapper)
+   public AATestsController(DefaultContext context, IDeviceService deviceService, IMapper mapper)
    {
       _context = context;
-      _propertyService = propertyService;
+      _deviceService = deviceService;
       _mapper = mapper;
    }
    [HttpGet("{input}")]
@@ -45,11 +45,9 @@ public class AATestsController : BaseTestController
    [HttpGet]
    public async Task<ActionResult> Index()
    {
-      var list = await _propertyService.FetchAsync(true);
-      var batch = list.GetInBatches(4);
-
-
-      return Ok(batch);
+      string test = "110314010100070000070";
+      if (test.Length == 21) test = test.Substring(3);
+      return Ok(test);
    }
    //int AddTitle(ExcelWorksheet worksheet, int rowIndex, string title)
    //{

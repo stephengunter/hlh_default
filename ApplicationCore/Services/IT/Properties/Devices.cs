@@ -129,6 +129,7 @@ public class DeviceService : IDeviceService
    }
    void SetPropertyId(Device entity, IList<Property> properties)
    {
+      entity.PropNum = entity.PropNum.IsNullOrEmpty() ? "" : entity.PropNum.Replace("-", "");
       Property? property = null;
       if (!string.IsNullOrEmpty(entity.PropNum)) property = properties.FirstOrDefault(x => x.Number == entity.PropNum);
       entity.PropertyId = property is null ? null : property.Id;
@@ -139,6 +140,10 @@ public class DeviceService : IDeviceService
       if (!string.IsNullOrEmpty(entity.Room))
       {
          location = locations.FirstOrDefault(x => x.Title == entity.Room.Trim());
+         if (location == null)
+         {
+            location = locations.FirstOrDefault(x => x.Name == entity.Room.Trim());
+         } 
       }
       entity.LocationId = location is null ? null : location.Id;
    }

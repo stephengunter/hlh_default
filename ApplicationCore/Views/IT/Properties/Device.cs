@@ -59,12 +59,18 @@ public class DeviceViewModel : EntityBaseView, IBaseRecordView
 
 }
 
+public class DevicesGroupView
+{
+   public int? CategoryId { get; set; }
+   public string CategoryName { get; set; } = string.Empty;
+   public int Count { get; set; }
+}
 public class DeviceLabels
 {
+   public string No => "設備編號";
    public string Title => "名稱";
    public string Name => "別名";
    public string Category => "設備分類";
-   public string No => "設備編號"; 
    public string Brand => "廠牌";
    public string Type => "型號";
    public string PropNum => "財產編號";

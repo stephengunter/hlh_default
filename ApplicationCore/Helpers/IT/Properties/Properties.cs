@@ -66,10 +66,12 @@ public static class PropertyHelpers
          Count = x.Count
       }).ToList();
       return list;
+
    }
    public static string ToPropertyNumberText(this string? number)
    {
       if (string.IsNullOrEmpty(number)) return "";
+      if (number.Length == 21) number = number.Substring(3);
       if (number.Length == 18)
       {
          return $"{number[0]}-{number.Substring(1, 2)}-{number.Substring(3, 2)}-{number.Substring(5, 2)}-{number.Substring(7, 4)}-{number.Substring(11, 7)}";

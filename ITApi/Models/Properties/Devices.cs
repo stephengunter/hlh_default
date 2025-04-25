@@ -4,6 +4,7 @@ using ApplicationCore.Views.Identity;
 using ApplicationCore.Views.IT;
 using Azure.Core;
 using Infrastructure.Helpers;
+using Infrastructure.Paging;
 using Infrastructure.Views;
 
 namespace ITApi.Models;
@@ -26,22 +27,25 @@ public class DevicesAdminModel
 }
 public class DevicesIndexModel
 {
-   public DevicesIndexModel(ICollection<DeviceViewModel> items)
+   public DevicesIndexModel(PagedList<Device, DeviceViewModel> pagedList, ICollection<DevicesGroupView> groupViews)
    {
-      Devices = items;
+      PagedList = pagedList;
+      GroupViews = groupViews;
    }
-   
-   public ICollection<DeviceViewModel> Devices { get; set; }
+   public PagedList<Device, DeviceViewModel> PagedList { get; set; }
+   public ICollection<DevicesGroupView> GroupViews { get; set; }
 }
 public class DevicesFetchRequest
 {
-   public DevicesFetchRequest(bool fired, int? category)
-   {
-      Fired = fired;
-      Category = category;
-   }
    public bool Fired { get; set; }
-   public int? Category { get; set; }
+   public int Category { get; set; }
+   public int? Location { get; set; }
+   public int? Page { get; set; }
+   public int? PageSize { get; set; }
+}
+public class DevicesImportRequest
+{
+   public IFormFile? File { get; set; }
 }
 public abstract class BaseDeviceForm
 {
