@@ -20,14 +20,16 @@ public class ItemTransactionLabels
 }
 public class ItemTransactionsFetchRequest
 {
-   public ItemTransactionsFetchRequest(int year, int month, int? item = null)
+   public ItemTransactionsFetchRequest(int year, int month, int inOut, int? item = null)
    {
       Year = year;
       Month = month;
+      InOut = inOut;
       Item = item;
    }
    public int Year { get; set; }
    public int Month { get; set; }
+   public int InOut { get; set; }
    public int? Item { get; set; }
 }
 public class ItemTransactionsIndexModel
@@ -39,6 +41,7 @@ public class ItemTransactionsIndexModel
    public List<BaseOption<int>> YearOptions { get; set; } = new List<BaseOption<int>>();
    public ItemTransactionsFetchRequest Request { get; set; }
    public List<BaseOption<int>> ItemOptions { get; set; } = new List<BaseOption<int>>();
+   public List<BaseOption<int>> InOutOptions { get; set; } = new List<BaseOption<int>>();
    public ItemTransactionLabels Labels => new ItemTransactionLabels();
 }
 

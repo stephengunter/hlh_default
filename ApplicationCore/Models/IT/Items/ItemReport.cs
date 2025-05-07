@@ -7,6 +7,20 @@ namespace ApplicationCore.Models.IT;
 [Table("IT.ItemReports")]
 public class ItemReport : EntityBase, IBaseRecord
 {
+   public ItemReport() 
+   { 
+   
+   }
+   // year: 民國, 例如113
+   // month: 月份, 0 代表年度結存報表, 
+   public ItemReport(int year, int month)
+   {
+      Year = year;
+      Month = month;
+      var date = DateTimeHelpers.GetLastDayOfMonth(year.ROCYearToBC(), month);
+      Date = $"{date.Year.ToROCYear()}-{date.Month}-{date.Day}";
+   }
+
    public int Year { get; set; }
    public int Month { get; set; }
    public string? Date { get; set; }

@@ -33,4 +33,9 @@ public class ItemReportsFetchRequest
    }
    public int Year { get; set; }
 }
+public class ItemReportForm
+{
+   public int Year { get; set; }
+   public int Month { get; set; }
+}
 

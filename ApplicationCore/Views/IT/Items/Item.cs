@@ -10,6 +10,7 @@ public class ItemViewModel : EntityBaseView, IBaseRecordView
    public string Title { get; set; } = String.Empty;
    public string Code { get; set; } = String.Empty;
    public int Price { get; set; }
+   public int OutCount { get; set; }
    public int Stock { get; set; }
    public int SaveStock { get; set; }
    public string? Supplier { get; set; }

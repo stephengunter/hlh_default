@@ -46,7 +46,8 @@ public class ItemTransactionsController : BaseAdminController
    public async Task<ActionResult<ItemTransactionsIndexModel>> Init()
    {
       var date = DateTime.Today;
-      var request = new ItemTransactionsFetchRequest(date.Year.ToROCYear(), date.Month);
+      int inOut = -1; //出貨
+      var request = new ItemTransactionsFetchRequest(date.Year.ToROCYear(), date.Month, inOut);
       var model = new ItemTransactionsIndexModel(request);
 
       var minYear = _settings.MinYear;
@@ -62,16 +63,24 @@ public class ItemTransactionsController : BaseAdminController
       items = items.Where(x => x.Active).ToList();
       model.ItemOptions = items.Select(item => item.ToOption()).ToList();
 
+      var inOutOptions = new List<BaseOption<int>>();
+      inOutOptions.Add(new BaseOption<int>(-1, "出貨"));
+      inOutOptions.Add(new BaseOption<int>(1, "進貨"));
+      inOutOptions.Add(new BaseOption<int>(0, "全部"));
+      model.InOutOptions = inOutOptions;
       return model;
    }
    [HttpGet]   
-   public async Task<ActionResult<ICollection<ItemTransactionViewModel>>> Index(int year, int month, int? item)
+   public async Task<ActionResult<ICollection<ItemTransactionViewModel>>> Index(int year, int month, int inOut, int? item)
    {
       var includes = new List<string>() { nameof(Item) };
       year = year.ROCYearToBC();
-      DateTime startDate = DateTimeHelpers.GetFirstDayOfMonth(year, month);
-      DateTime endDate = DateTimeHelpers.GetLastDayOfMonth(year, month);
+      DateTime startDate = month > 0 ? DateTimeHelpers.GetFirstDayOfMonth(year, month) : new DateTime(year, 1, 1).ToStartDate();
+      DateTime endDate = month > 0 ? DateTimeHelpers.GetLastDayOfMonth(year, month) : new DateTime(year, 12, 31).ToEndDate();
       var trans = await _transactionService.FetchAsync(startDate, endDate, includes);
+      
+      if (inOut < 0) trans = trans.Where(x => x.Quantity < 0);//出貨
+      else if (inOut > 0) trans = trans.Where(x => x.Quantity > 0);//進貨
 
       if (item.HasValue) trans = trans.Where(x => x.ItemId == item.Value);
 

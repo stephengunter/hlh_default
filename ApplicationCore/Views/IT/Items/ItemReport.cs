@@ -1,4 +1,5 @@
-﻿using Infrastructure.Entities;
+﻿using ApplicationCore.Models.IT;
+using Infrastructure.Entities;
 using Infrastructure.Helpers;
 using Infrastructure.Views;
 
@@ -11,6 +12,8 @@ public class ItemReportViewModel : EntityBaseView, IBaseRecordView
    public string? Date { get; set; }
    public string? Ps { get; set; }
 
+   public bool CanDelete { get; set; }
+
    public DateTime CreatedAt { get; set; }
    public string CreatedBy { get; set; } = String.Empty;
    public DateTime? LastUpdated { get; set; }
@@ -18,5 +21,7 @@ public class ItemReportViewModel : EntityBaseView, IBaseRecordView
 
    public string CreatedAtText => CreatedAt.ToDateTimeString();
    public string LastUpdatedText => LastUpdated.ToDateTimeString();
+
+   public virtual ICollection<ItemBalanceSheetViewModel> ItemBalanceSheets { get; set; } = new List<ItemBalanceSheetViewModel>();
 
 }

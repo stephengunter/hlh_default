@@ -10,6 +10,9 @@ public interface IItemReportService
    Task<IEnumerable<int>> FetchYearsAsync();
    Task<IEnumerable<ItemReport>> FetchAsync(int year);
    Task<ItemReport?> GetLastClosedAsync();
+   Task<ItemReport?> GetLatestAsync();
+
+   Task<ItemReport?> FindByYearMonthAsync(int year, int month);
    Task<ItemReport?> GetByIdAsync(int id);
    Task<ItemReport> CreateAsync(ItemReport entity, string userId);
    Task UpdateAsync(ItemReport entity, string userId);
@@ -36,6 +39,12 @@ public class ItemReportService : IItemReportService
    public async Task<ItemReport?> GetLastClosedAsync()
       => await _repository.FirstOrDefaultAsync(new ItemReportLastClosedSpecification());
 
+   public async Task<ItemReport?> GetLatestAsync()
+      => await _repository.FirstOrDefaultAsync(new ItemReportLatestSpecification());
+
+   public async Task<ItemReport?> FindByYearMonthAsync(int year, int month)
+      => await _repository.FirstOrDefaultAsync(new ItemReportSpecification(year, month));
+  
    public async Task<ItemReport?> GetByIdAsync(int id)
       => await _repository.GetByIdAsync(id);
 
@@ -45,10 +54,7 @@ public class ItemReportService : IItemReportService
       return await _repository.AddAsync(entity);
    }
    public async Task AddRangeAsync(ICollection<ItemReport> entities)
-   {
-      
-       await _repository.AddRangeAsync(entities);
-   }
+      => await _repository.AddRangeAsync(entities);
 
    public async Task UpdateAsync(ItemReport entity, string userId)
    {

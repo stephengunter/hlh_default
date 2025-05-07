@@ -14,6 +14,7 @@ public interface IItemService
    Task UpdateAsync(Item entity, string userId);
    Task RemoveAsync(Item entity, string userId);
    Task AddRangeAsync(ICollection<Item> entities);
+   Task UpdateRangeAsync(ICollection<Item> entities);
 }
 
 public class ItemService : IItemService
@@ -39,10 +40,10 @@ public class ItemService : IItemService
       return await _repository.AddAsync(entity);
    }
    public async Task AddRangeAsync(ICollection<Item> entities)
-   {
-      
-       await _repository.AddRangeAsync(entities);
-   }
+      => await _repository.AddRangeAsync(entities);
+
+   public async Task UpdateRangeAsync(ICollection<Item> entities)
+      => await _repository.UpdateRangeAsync(entities);
 
    public async Task UpdateAsync(Item entity, string userId)
    {

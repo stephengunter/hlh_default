@@ -10,6 +10,8 @@ using ApplicationCore.Helpers.IT;
 using ApplicationCore.Services.IT;
 using ITApi.Models;
 using ApplicationCore.Services.Identity;
+using ApplicationCore.Views.IT;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ITApi.Controllers.Admin;
 
@@ -20,6 +22,7 @@ public class ItemsController : BaseAdminController
    private readonly IItemReportService _itemReportService;
    private readonly IItemBalanceSheetService _itemBalanceSheetService;
    private readonly IMapper _mapper;
+   private readonly int DAYS_OUTCOUNT = 180;
 
    public ItemsController(IItemService itemService, IDepartmentsService departmentsService,
       IItemTransactionService transactionService, IItemReportService itemReportService,
@@ -49,7 +52,14 @@ public class ItemsController : BaseAdminController
 
       return model;
    }
-
+   async Task<ItemReport> GetLatestReportAsync()
+   {
+      // find the latest month report
+      var latest = await _itemReportService.GetLatestAsync();
+      // if not found, get last yearly closed report 
+      if (latest == null) latest = await _itemReportService.GetLastClosedAsync();
+      return latest!;
+   }
    [HttpGet]   
    public async Task<ActionResult<ItemsIndexModel>> Index(bool active)
    {
@@ -58,12 +68,12 @@ public class ItemsController : BaseAdminController
 
       if (!active) return new ItemsIndexModel(items.MapViewModelList(_mapper));
 
-      var lastClosed = await _itemReportService.GetLastClosedAsync();
-      var sheets = await _itemBalanceSheetService.FetchAsync(lastClosed!);
+      //取得最近一次結算庫存
+      var latestReport = await GetLatestReportAsync();
+      var sheets = await _itemBalanceSheetService.FetchAsync(latestReport!);
 
-      var date = lastClosed!.GetDate();
-      var transactions = await _transactionService.FetchAsync(date!.Value.AddDays(1));
-      var year_transactions = await _transactionService.FetchAsync(DateTime.Today.AddYears(-1));
+      //取得自最近一次結算庫存以來所有交易紀錄
+      var transactions = await _transactionService.FetchAsync(latestReport!.GetDate()!.Value.AddDays(1));
       foreach (var item in items)
       {
          int lastStock = 0;
@@ -73,19 +83,28 @@ public class ItemsController : BaseAdminController
          var trans = transactions.Where(x => x.ItemId == item.Id);
          if (trans.IsNullOrEmpty()) item.Stock = lastStock;
          else item.Stock = lastStock + trans.Sum(x => x.Quantity);
-
-         var itemYearTransactions = year_transactions.Where(x => x.ItemId == item.Id && x.Quantity > 0);
-         if (itemYearTransactions.IsNullOrEmpty()) item.SaveStock = 0;
-         else item.SaveStock = itemYearTransactions.Sum(x => x.Quantity);
-
       }
 
       items = items.OrderByDescending(x => x.SaveStock);
-
-      var model = new ItemsIndexModel(items.MapViewModelList(_mapper));
-      model.LastClosed = lastClosed!.MapViewModel(_mapper);
+      var views = items.MapViewModelList(_mapper);
+      await LoadOutCountAsync(views);
+      var model = new ItemsIndexModel(views);
+      model.LastReport = latestReport!.MapViewModel(_mapper);
       return model;
    }
+   async Task LoadOutCountAsync(ICollection<ItemViewModel> itemViews)
+   {
+      var date = DateTime.Today.AddDays(0 - DAYS_OUTCOUNT);
+      //取得近 DAYS_OUTCOUNT 天以來所有交易紀錄
+      var transactions = await _transactionService.FetchAsync(date);
+      foreach (var itemView in itemViews)
+      { 
+         var outTrans = transactions.Where(x => x.ItemId == itemView.Id && x.Quantity < 0);
+         itemView.OutCount = Math.Abs(outTrans.Sum(x => x.Quantity));
+      }
+   }
+
+
    [HttpGet("create")]
    public ActionResult<ItemAddForm> Create()
       => new ItemAddForm();

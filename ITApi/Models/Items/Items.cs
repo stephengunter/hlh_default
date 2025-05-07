@@ -30,7 +30,7 @@ public class ItemsIndexModel
    {
       Items = items;
    }
-   public ItemReportViewModel? LastClosed { get; set; }
+   public ItemReportViewModel? LastReport { get; set; }
    public ICollection<ItemViewModel> Items { get; set; }
 }
 public class ItemsFetchRequest
@@ -45,6 +45,7 @@ public abstract class BaseItemForm
 {
    public string Name { get; set; } = String.Empty;
    public string Code { get; set; } = String.Empty;
+   public int SaveStock { get; set; }
    public string? Ps { get; set; }
    public bool Active { get; set; }
 }

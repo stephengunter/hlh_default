@@ -22,19 +22,21 @@ using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Ardalis.Specification;
+using System;
+using ITApi.Models;
 
 namespace ITApi.Controllers.Tests;
 
 public class AATestsController : BaseTestController
 {
-   
-   private readonly DefaultContext _context;
-   private readonly IDeviceService _deviceService;
+
+   private readonly IItemReportService _reportsService;
+   private readonly IItemBalanceSheetService _balanceSheetService;
    private readonly IMapper _mapper;
-   public AATestsController(DefaultContext context, IDeviceService deviceService, IMapper mapper)
+   public AATestsController(IItemReportService reportsService, IItemBalanceSheetService balanceSheetService, IMapper mapper)
    {
-      _context = context;
-      _deviceService = deviceService;
+      _reportsService = reportsService;
+      _balanceSheetService = balanceSheetService;
       _mapper = mapper;
    }
    [HttpGet("{input}")]
@@ -45,9 +47,29 @@ public class AATestsController : BaseTestController
    [HttpGet]
    public async Task<ActionResult> Index()
    {
-      string test = "110314010100070000070";
-      if (test.Length == 21) test = test.Substring(3);
-      return Ok(test);
+      // find the latest month report
+      var latest = await _reportsService.GetLatestAsync();
+      // if not found, get last yearly closed report 
+      if (latest == null) latest = await _reportsService.GetLastClosedAsync();
+
+      var reportDate = new DateTime(latest.Year.ROCYearToBC(), latest.Month + 1, 1);
+      var end = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
+
+      var forms = new List<ItemReportForm>();
+      while (reportDate < end) 
+      {
+         forms.Add(new ItemReportForm
+         {
+            Year = reportDate.Year.ToROCYear(),
+            Month = reportDate.Month,
+         });
+         reportDate = reportDate.AddMonths(1);
+      }
+      
+      int currentYear = DateTime.Today.Year - 1911;
+      int currentMonth = DateTime.Today.Month;
+
+      return Ok(forms);
    }
    //int AddTitle(ExcelWorksheet worksheet, int rowIndex, string title)
    //{
