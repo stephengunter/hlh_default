@@ -1,29 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using ApplicationCore.Web.Controllers;
 using AutoMapper;
-using ApplicationCore.Models.IT;
-using ApplicationCore.DataAccess;
 using ApplicationCore.Services.IT;
-using ApplicationCore.Helpers.Identity;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-using OfficeOpenXml;
-using Infrastructure.Helpers;
-using ApplicationCore.Services.Identity;
-using ApplicationCore.Services;
-using ApplicationCore.Models.Identity;
-using ApplicationCore.Migrations;
-using ApplicationCore.Settings;
-using Microsoft.Extensions.Options;
 using ApplicationCore.Helpers.IT;
-using Polly;
-using ApplicationCore.Specifications.IT;
-using Infrastructure.Interfaces;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using System.Collections.Generic;
-using Microsoft.EntityFrameworkCore;
-using Ardalis.Specification;
-using System;
-using ITApi.Models;
+using ApplicationCore.Migrations;
 
 namespace ITApi.Controllers.Tests;
 
@@ -47,29 +27,7 @@ public class AATestsController : BaseTestController
    [HttpGet]
    public async Task<ActionResult> Index()
    {
-      // find the latest month report
-      var latest = await _reportsService.GetLatestAsync();
-      // if not found, get last yearly closed report 
-      if (latest == null) latest = await _reportsService.GetLastClosedAsync();
-
-      var reportDate = new DateTime(latest.Year.ROCYearToBC(), latest.Month + 1, 1);
-      var end = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
-
-      var forms = new List<ItemReportForm>();
-      while (reportDate < end) 
-      {
-         forms.Add(new ItemReportForm
-         {
-            Year = reportDate.Year.ToROCYear(),
-            Month = reportDate.Month,
-         });
-         reportDate = reportDate.AddMonths(1);
-      }
-      
-      int currentYear = DateTime.Today.Year - 1911;
-      int currentMonth = DateTime.Today.Month;
-
-      return Ok(forms);
+      return Ok();
    }
    //int AddTitle(ExcelWorksheet worksheet, int rowIndex, string title)
    //{

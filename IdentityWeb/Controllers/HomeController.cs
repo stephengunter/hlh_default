@@ -14,6 +14,7 @@ using IdentityWeb.Models;
 
 namespace IdentityWeb.Controllers;
 
+
 [Authorize]
 public class HomeController : Controller
 {
